@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle, BarChart, FileText, Receipt, CreditCard } from 'lucide-react';
+import { ArrowRight, CheckCircle, BarChart, FileText, Receipt, CreditCard, Users } from 'lucide-react';
 
 const LandingPage = () => {
   return (
