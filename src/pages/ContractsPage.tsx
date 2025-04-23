@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import PageHeader from '@/components/common/PageHeader';
 import ContractList, { ContractData } from '@/components/contracts/ContractList';
-import { FileContract } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { ClientFormData } from '@/components/clients/ClientForm';
 
@@ -99,7 +99,7 @@ const ContractsPage = () => {
       <PageHeader
         title="Contracts"
         description="Manage your active and past contracts"
-        icon={FileContract}
+        icon={FileText}
       />
 
       <div className="mt-6">

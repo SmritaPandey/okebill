@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, Users, FileText, 
-  Receipt, BarChart, FileContract, 
+  Receipt, BarChart, FileText as ContractsIcon, 
   CreditCard, Settings, Menu, X
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -21,7 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Clients', href: '/clients', icon: Users },
     { name: 'Proposals', href: '/proposals', icon: FileText },
-    { name: 'Contracts', href: '/contracts', icon: FileContract },
+    { name: 'Contracts', href: '/contracts', icon: ContractsIcon },
     { name: 'Invoices', href: '/invoices', icon: Receipt },
     { name: 'Payments', href: '/payments', icon: CreditCard },
     { name: 'Analytics', href: '/analytics', icon: BarChart },
