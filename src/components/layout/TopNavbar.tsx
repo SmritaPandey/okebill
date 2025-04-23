@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Bell, Menu, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Menu, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -17,6 +18,17 @@ interface TopNavbarProps {
 }
 
 const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuToggle }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear auth state from localStorage
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('onboardingComplete');
+    
+    // Redirect to login page
+    navigate('/login');
+  };
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
       <div className="px-4 py-3 flex items-center justify-between">
@@ -50,10 +62,19 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuToggle }) => {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Logout</span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

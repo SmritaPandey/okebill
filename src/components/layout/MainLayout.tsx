@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -11,6 +12,19 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = React.useState(!isMobile);
+  const navigate = useNavigate();
+
+  // Check if user is authenticated and has completed onboarding
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
+    
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else if (!onboardingComplete) {
+      navigate('/onboarding');
+    }
+  }, [navigate]);
 
   React.useEffect(() => {
     setSidebarOpen(!isMobile);
