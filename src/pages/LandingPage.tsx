@@ -1,9 +1,26 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, BarChart, FileText, Receipt, CreditCard, Users } from 'lucide-react';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleGetStarted = () => {
+    navigate('/register');
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header/Navigation */}
@@ -13,20 +30,41 @@ const LandingPage = () => {
             <h1 className="text-xl font-semibold text-brand-blue">BillWise</h1>
           </div>
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/#features" className="text-sm font-medium text-gray-600 hover:text-gray-900">Features</Link>
-            <Link to="/#pricing" className="text-sm font-medium text-gray-600 hover:text-gray-900">Pricing</Link>
-            <Link to="/#testimonials" className="text-sm font-medium text-gray-600 hover:text-gray-900">Testimonials</Link>
-            <Link to="/#contact" className="text-sm font-medium text-gray-600 hover:text-gray-900">Contact</Link>
+            <button 
+              onClick={() => scrollToSection('features')} 
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer"
+            >
+              Features
+            </button>
+            <button 
+              onClick={() => scrollToSection('pricing')} 
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer"
+            >
+              Pricing
+            </button>
+            <button 
+              onClick={() => scrollToSection('testimonials')} 
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer"
+            >
+              Testimonials
+            </button>
+            <button 
+              onClick={() => scrollToSection('contact')} 
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer"
+            >
+              Contact
+            </button>
           </nav>
           <div className="flex items-center gap-4">
-            <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+            <button 
+              onClick={handleLogin}
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
               Login
-            </Link>
-            <Link to="/register">
-              <Button>
-                Get Started <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            </button>
+            <Button onClick={handleGetStarted}>
+              Get Started <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </div>
       </header>
@@ -43,16 +81,12 @@ const LandingPage = () => {
                 From proposals to payments, manage your entire billing workflow with our comprehensive SaaS platform.
               </p>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Link to="/register">
-                  <Button size="lg">
-                    Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link to="/login">
-                  <Button variant="outline" size="lg">
-                    Book a Demo
-                  </Button>
-                </Link>
+                <Button size="lg" onClick={handleGetStarted}>
+                  Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="lg" onClick={handleLogin}>
+                  Book a Demo
+                </Button>
               </div>
             </div>
             <div className="flex justify-center">
@@ -166,9 +200,7 @@ const LandingPage = () => {
                 </li>
               </ul>
               <div className="mt-6">
-                <Link to="/register">
-                  <Button className="w-full">Get Started</Button>
-                </Link>
+                <Button className="w-full" onClick={handleGetStarted}>Get Started</Button>
               </div>
             </div>
             <div className="flex flex-col rounded-lg border bg-white p-6 shadow-sm relative">
@@ -202,9 +234,7 @@ const LandingPage = () => {
                 </li>
               </ul>
               <div className="mt-6">
-                <Link to="/register">
-                  <Button className="w-full">Get Started</Button>
-                </Link>
+                <Button className="w-full" onClick={handleGetStarted}>Get Started</Button>
               </div>
             </div>
             <div className="flex flex-col rounded-lg border bg-white p-6 shadow-sm">
@@ -234,10 +264,50 @@ const LandingPage = () => {
                 </li>
               </ul>
               <div className="mt-6">
-                <Link to="/contact">
-                  <Button variant="outline" className="w-full">Contact Sales</Button>
-                </Link>
+                <button className="w-full border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 h-10 px-4 py-2 rounded-md text-sm font-medium">
+                  Contact Sales
+                </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-20 bg-white">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-brand-blue">
+                What Our Customers Say
+              </h2>
+              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
+                Join thousands of businesses that trust BillWise for their billing needs.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-20 bg-gray-50">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-brand-blue">
+                Get in Touch
+              </h2>
+              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
+                Ready to streamline your billing process? Contact us today.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 min-[400px]:flex-row">
+              <Button size="lg" onClick={handleGetStarted}>
+                Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="lg" onClick={handleLogin}>
+                Contact Sales
+              </Button>
             </div>
           </div>
         </div>
@@ -251,13 +321,28 @@ const LandingPage = () => {
               <h3 className="text-lg font-medium">Product</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link to="/#features" className="text-sm text-gray-500 hover:text-gray-900">Features</Link>
+                  <button 
+                    onClick={() => scrollToSection('features')} 
+                    className="text-sm text-gray-500 hover:text-gray-900"
+                  >
+                    Features
+                  </button>
                 </li>
                 <li>
-                  <Link to="/#pricing" className="text-sm text-gray-500 hover:text-gray-900">Pricing</Link>
+                  <button 
+                    onClick={() => scrollToSection('pricing')} 
+                    className="text-sm text-gray-500 hover:text-gray-900"
+                  >
+                    Pricing
+                  </button>
                 </li>
                 <li>
-                  <Link to="/register" className="text-sm text-gray-500 hover:text-gray-900">Sign Up</Link>
+                  <button 
+                    onClick={handleGetStarted} 
+                    className="text-sm text-gray-500 hover:text-gray-900"
+                  >
+                    Sign Up
+                  </button>
                 </li>
               </ul>
             </div>
@@ -265,10 +350,15 @@ const LandingPage = () => {
               <h3 className="text-lg font-medium">Company</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link to="/about" className="text-sm text-gray-500 hover:text-gray-900">About</Link>
+                  <span className="text-sm text-gray-500">About</span>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-sm text-gray-500 hover:text-gray-900">Contact</Link>
+                  <button 
+                    onClick={() => scrollToSection('contact')} 
+                    className="text-sm text-gray-500 hover:text-gray-900"
+                  >
+                    Contact
+                  </button>
                 </li>
               </ul>
             </div>
@@ -276,10 +366,10 @@ const LandingPage = () => {
               <h3 className="text-lg font-medium">Resources</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link to="/blog" className="text-sm text-gray-500 hover:text-gray-900">Blog</Link>
+                  <span className="text-sm text-gray-500">Blog</span>
                 </li>
                 <li>
-                  <Link to="/docs" className="text-sm text-gray-500 hover:text-gray-900">Documentation</Link>
+                  <span className="text-sm text-gray-500">Documentation</span>
                 </li>
               </ul>
             </div>
@@ -287,10 +377,10 @@ const LandingPage = () => {
               <h3 className="text-lg font-medium">Legal</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link to="/privacy" className="text-sm text-gray-500 hover:text-gray-900">Privacy Policy</Link>
+                  <span className="text-sm text-gray-500">Privacy Policy</span>
                 </li>
                 <li>
-                  <Link to="/terms" className="text-sm text-gray-500 hover:text-gray-900">Terms of Service</Link>
+                  <span className="text-sm text-gray-500">Terms of Service</span>
                 </li>
               </ul>
             </div>

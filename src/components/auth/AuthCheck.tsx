@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 interface AuthCheckProps {
   children: React.ReactNode;
@@ -23,6 +23,7 @@ const AuthCheck: React.FC<AuthCheckProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     // In a real app, you would check with an auth service
@@ -50,12 +51,12 @@ const AuthCheck: React.FC<AuthCheckProps> = ({
     return <Navigate to="/onboarding" replace />;
   }
 
-  // If user is authenticated and tries to access auth pages (login/register), redirect to app
-  if (isAuthenticated && window.location.pathname.match(/^\/(login|register)$/)) {
+  // If user is authenticated and tries to access auth pages (login/register), redirect to dashboard
+  if (isAuthenticated && location.pathname.match(/^\/(login|register)$/)) {
     if (!onboardingComplete) {
       return <Navigate to="/onboarding" replace />;
     }
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
