@@ -104,7 +104,7 @@ const App = () => (
             element={
               <AuthCheck requireAuth={true} requireOnboarding={true}>
                 <InvoicesPage />
-              </AuthRef>
+              </AuthCheck>
             } 
           />
           <Route 
