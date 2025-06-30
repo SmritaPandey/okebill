@@ -28,15 +28,17 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Public routes */}
+          {/* Landing page as the default route */}
           <Route 
-            path="/landing" 
+            path="/" 
             element={
               <AuthCheck requireAuth={false} requireOnboarding={false}>
                 <LandingPage />
               </AuthCheck>
             } 
           />
+          
+          {/* Public routes */}
           <Route 
             path="/login" 
             element={
@@ -66,7 +68,7 @@ const App = () => (
           
           {/* Protected routes */}
           <Route 
-            path="/" 
+            path="/dashboard" 
             element={
               <AuthCheck requireAuth={true} requireOnboarding={true}>
                 <Index />
@@ -102,7 +104,7 @@ const App = () => (
             element={
               <AuthCheck requireAuth={true} requireOnboarding={true}>
                 <InvoicesPage />
-              </AuthCheck>
+              </AuthRef>
             } 
           />
           <Route 
@@ -126,16 +128,6 @@ const App = () => (
             element={
               <AuthCheck requireAuth={true} requireOnboarding={true}>
                 <SettingsPage />
-              </AuthCheck>
-            } 
-          />
-          
-          {/* Redirect to landing page for initial visit */}
-          <Route 
-            path="/" 
-            element={
-              <AuthCheck requireAuth={false} requireOnboarding={false}>
-                <LandingPage />
               </AuthCheck>
             } 
           />
