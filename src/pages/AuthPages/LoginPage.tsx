@@ -5,38 +5,79 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     
-    // This is a mock login function
-    // In a real app, you would connect this to your auth service
+    // Mock login function - in real app this would connect to auth service
     setTimeout(() => {
       // Store auth state in localStorage
       localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('onboardingComplete', 'false');
+      
+      // Check if user has completed onboarding (mock check)
+      const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
+      
       setIsLoading(false);
-      navigate('/onboarding');
+      
+      if (onboardingComplete) {
+        navigate('/dashboard');
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in."
+        });
+      } else {
+        navigate('/onboarding');
+        toast({
+          title: "Welcome!",
+          description: "Please complete your onboarding."
+        });
+      }
     }, 1000);
+  };
+
+  const handleSocialLogin = (provider: string) => {
+    toast({
+      title: "Coming Soon",
+      description: `${provider} login will be available soon.`
+    });
+  };
+
+  const handleForgotPassword = () => {
+    toast({
+      title: "Password Reset",
+      description: "Password reset functionality will be available soon."
+    });
   };
 
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-bold text-brand-blue">BillWise</h1>
+        <h1 className="text-center text-3xl font-bold text-blue-600">BillWise</h1>
         <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
           Sign in to your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          <Link to="/register" className="font-medium text-brand-blue hover:text-brand-blue-dark">
+          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
             Register here
           </Link>
         </p>
@@ -89,7 +130,7 @@ const LoginPage = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                   Remember me
@@ -97,9 +138,13 @@ const LoginPage = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-brand-blue hover:text-brand-blue-dark">
+                <button 
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
                   Forgot your password?
-                </a>
+                </button>
               </div>
             </div>
 
@@ -136,12 +181,14 @@ const LoginPage = () => {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
+                onClick={() => handleSocialLogin('Google')}
                 className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
               >
                 Google
               </button>
               <button
                 type="button"
+                onClick={() => handleSocialLogin('Microsoft')}
                 className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
               >
                 Microsoft

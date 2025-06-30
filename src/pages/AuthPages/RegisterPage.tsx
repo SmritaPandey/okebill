@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, User, Building, ArrowRight } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const RegisterPage = () => {
   const [firstName, setFirstName] = useState('');
@@ -13,39 +14,108 @@ const RegisterPage = () => {
   const [companyName, setCompanyName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    if (!firstName || !lastName || !email || !companyName || !password || !confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!termsAccepted) {
+      toast({
+        title: "Error",
+        description: "Please accept the terms and conditions",
+        variant: "destructive"
+      });
       return;
     }
     
     setIsLoading(true);
     
-    // This is a mock registration function
-    // In a real app, you would connect this to your auth service
+    // Mock registration function - in real app this would connect to auth service
     setTimeout(() => {
-      // Store auth state in localStorage
+      // Store auth state and user data in localStorage
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('onboardingComplete', 'false');
+      localStorage.setItem('userData', JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        companyName
+      }));
+      
       setIsLoading(false);
+      
+      toast({
+        title: "Account created successfully!",
+        description: "Welcome to BillWise. Let's get you set up."
+      });
+      
+      // Redirect directly to onboarding
       navigate('/onboarding');
     }, 1000);
+  };
+
+  const handleSocialSignup = (provider: string) => {
+    toast({
+      title: "Coming Soon",
+      description: `${provider} signup will be available soon.`
+    });
+  };
+
+  const handleTermsClick = () => {
+    toast({
+      title: "Terms of Service",
+      description: "Terms of Service page will be available soon."
+    });
+  };
+
+  const handlePrivacyClick = () => {
+    toast({
+      title: "Privacy Policy",
+      description: "Privacy Policy page will be available soon."
+    });
   };
 
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-bold text-brand-blue">BillWise</h1>
+        <h1 className="text-center text-3xl font-bold text-blue-600">BillWise</h1>
         <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
           Create your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-brand-blue hover:text-brand-blue-dark">
+          <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
             Sign in
           </Link>
         </p>
@@ -169,17 +239,27 @@ const RegisterPage = () => {
                 name="terms"
                 type="checkbox"
                 required
-                className="h-4 w-4 rounded border-gray-300 text-brand-blue focus:ring-brand-blue"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
                 I agree to the{' '}
-                <a href="#" className="font-medium text-brand-blue hover:text-brand-blue-dark">
+                <button 
+                  type="button"
+                  onClick={handleTermsClick}
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
                   Terms of Service
-                </a>{' '}
+                </button>{' '}
                 and{' '}
-                <a href="#" className="font-medium text-brand-blue hover:text-brand-blue-dark">
+                <button 
+                  type="button"
+                  onClick={handlePrivacyClick}
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
                   Privacy Policy
-                </a>
+                </button>
               </label>
             </div>
 

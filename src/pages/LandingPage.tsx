@@ -1,10 +1,13 @@
+
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, BarChart, FileText, Receipt, CreditCard, Users } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -21,13 +24,27 @@ const LandingPage = () => {
     navigate('/login');
   };
 
+  const handleBookDemo = () => {
+    toast({
+      title: "Demo Request",
+      description: "Demo booking functionality will be available soon. Please contact our sales team."
+    });
+  };
+
+  const handleContactSales = () => {
+    toast({
+      title: "Contact Sales",
+      description: "Sales contact form will be available soon. Please email us at sales@billwise.com"
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header/Navigation */}
       <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/90 backdrop-blur-sm">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold text-brand-blue">BillWise</h1>
+            <h1 className="text-xl font-semibold text-blue-600">BillWise</h1>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <button 
@@ -74,7 +91,7 @@ const LandingPage = () => {
         <div className="container px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
             <div className="space-y-4">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-brand-blue">
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-blue-600">
                 Streamline Your Billing Process
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
@@ -84,7 +101,7 @@ const LandingPage = () => {
                 <Button size="lg" onClick={handleGetStarted}>
                   Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="lg" onClick={handleLogin}>
+                <Button variant="outline" size="lg" onClick={handleBookDemo}>
                   Book a Demo
                 </Button>
               </div>
@@ -107,7 +124,7 @@ const LandingPage = () => {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-brand-blue">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-blue-600">
                 Powerful Features
               </h2>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
@@ -117,43 +134,43 @@ const LandingPage = () => {
           </div>
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-12">
             <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <div className="rounded-full bg-brand-blue-light/10 p-3">
-                <FileText className="h-6 w-6 text-brand-blue" />
+              <div className="rounded-full bg-blue-100 p-3">
+                <FileText className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="text-xl font-bold">Proposal Generation</h3>
               <p className="text-center text-gray-500">Create professional proposals and convert them to contracts with a single click.</p>
             </div>
             <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <div className="rounded-full bg-brand-blue-light/10 p-3">
-                <Receipt className="h-6 w-6 text-brand-blue" />
+              <div className="rounded-full bg-blue-100 p-3">
+                <Receipt className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="text-xl font-bold">Automated Invoicing</h3>
               <p className="text-center text-gray-500">Generate and send invoices automatically based on contracts and billing cycles.</p>
             </div>
             <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <div className="rounded-full bg-brand-blue-light/10 p-3">
-                <CreditCard className="h-6 w-6 text-brand-blue" />
+              <div className="rounded-full bg-blue-100 p-3">
+                <CreditCard className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="text-xl font-bold">Payment Processing</h3>
               <p className="text-center text-gray-500">Secure payment gateway integration for seamless transaction processing.</p>
             </div>
             <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <div className="rounded-full bg-brand-blue-light/10 p-3">
-                <BarChart className="h-6 w-6 text-brand-blue" />
+              <div className="rounded-full bg-blue-100 p-3">
+                <BarChart className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="text-xl font-bold">Analytics & Reporting</h3>
               <p className="text-center text-gray-500">Comprehensive dashboards and reports to track your business performance.</p>
             </div>
             <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <div className="rounded-full bg-brand-blue-light/10 p-3">
-                <CheckCircle className="h-6 w-6 text-brand-blue" />
+              <div className="rounded-full bg-blue-100 p-3">
+                <CheckCircle className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="text-xl font-bold">Compliance Management</h3>
               <p className="text-center text-gray-500">Stay compliant with tax regulations and industry standards.</p>
             </div>
             <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <div className="rounded-full bg-brand-blue-light/10 p-3">
-                <Users className="h-6 w-6 text-brand-blue" />
+              <div className="rounded-full bg-blue-100 p-3">
+                <Users className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="text-xl font-bold">Client Management</h3>
               <p className="text-center text-gray-500">Maintain client profiles and track all interactions in one place.</p>
@@ -167,7 +184,7 @@ const LandingPage = () => {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-brand-blue">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-blue-600">
                 Simple, Transparent Pricing
               </h2>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
@@ -204,7 +221,7 @@ const LandingPage = () => {
               </div>
             </div>
             <div className="flex flex-col rounded-lg border bg-white p-6 shadow-sm relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-brand-blue text-white px-4 py-1 rounded-full text-sm font-medium">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
                 Most Popular
               </div>
               <div className="space-y-2">
@@ -264,7 +281,10 @@ const LandingPage = () => {
                 </li>
               </ul>
               <div className="mt-6">
-                <button className="w-full border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 h-10 px-4 py-2 rounded-md text-sm font-medium">
+                <button 
+                  onClick={handleContactSales}
+                  className="w-full border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 h-10 px-4 py-2 rounded-md text-sm font-medium"
+                >
                   Contact Sales
                 </button>
               </div>
@@ -278,7 +298,7 @@ const LandingPage = () => {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-brand-blue">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-blue-600">
                 What Our Customers Say
               </h2>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
@@ -294,7 +314,7 @@ const LandingPage = () => {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-brand-blue">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-blue-600">
                 Get in Touch
               </h2>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
@@ -305,7 +325,7 @@ const LandingPage = () => {
               <Button size="lg" onClick={handleGetStarted}>
                 Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button variant="outline" size="lg" onClick={handleLogin}>
+              <Button variant="outline" size="lg" onClick={handleContactSales}>
                 Contact Sales
               </Button>
             </div>
