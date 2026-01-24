@@ -18,7 +18,7 @@ export interface ProposalFormData {
   amount: string;
   taxRate: string;
   serviceType: string;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected';
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
 }
 
 interface ProposalFormProps {

@@ -1,11 +1,12 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import PageHeader from '@/components/common/PageHeader';
 import ProposalList from '@/components/proposals/ProposalList';
-import ProposalForm, { ProposalFormData } from '@/components/proposals/ProposalForm';
+import ProposalForm from '@/components/proposals/ProposalForm';
 import { FileText } from 'lucide-react';
-import { toast } from 'sonner';
+import { useProposals, ProposalFormData } from '@/hooks/useProposals';
+import { useClients } from '@/hooks/useClients';
+import { useContracts } from '@/hooks/useContracts';
 import { 
   Dialog,
   DialogContent,
@@ -13,89 +14,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ClientFormData } from '@/components/clients/ClientForm';
-
-// Generate mock proposal data
-const generateMockProposals = () => {
-  return [
-    {
-      id: '1',
-      title: 'Energy Efficiency Package',
-      clientId: '1',
-      description: 'Comprehensive energy efficiency upgrade for corporate headquarters',
-      validUntil: '2025-08-31',
-      amount: '25000',
-      taxRate: '10',
-      serviceType: 'energy',
-      status: 'draft',
-    },
-    {
-      id: '2',
-      title: 'Solar Installation Project',
-      clientId: '3',
-      description: 'Installation of rooftop solar panels with battery storage',
-      validUntil: '2025-09-15',
-      amount: '42500',
-      taxRate: '10',
-      serviceType: 'energy',
-      status: 'sent',
-    },
-    {
-      id: '3',
-      title: 'Water Conservation System',
-      clientId: '4',
-      description: 'Factory-wide water recycling and conservation system',
-      validUntil: '2025-07-30',
-      amount: '15750',
-      taxRate: '10',
-      serviceType: 'water',
-      status: 'accepted',
-    },
-  ] as ProposalFormData[];
-};
-
-// Mock client data
-const generateMockClients = () => {
-  return [
-    {
-      id: '1',
-      name: 'Acme Corporation',
-      email: 'contact@acme.com',
-      phone: '(555) 123-4567',
-      address: '123 Main St, Anytown, CA 94105',
-      notes: 'Key enterprise client',
-    },
-    {
-      id: '2',
-      name: 'TechNova Solutions',
-      email: 'info@technova.com',
-      phone: '(555) 987-6543',
-      address: '456 Innovation Dr, Tech City, CA 95123',
-      notes: '',
-    },
-    {
-      id: '3',
-      name: 'EcoEnergy Co.',
-      email: 'support@ecoenergy.com',
-      phone: '(555) 321-7890',
-      address: '789 Green Ave, Ecoville, CA 92001',
-      notes: 'Interested in renewable energy options',
-    },
-    {
-      id: '4',
-      name: 'Global Manufacturing Inc.',
-      email: 'info@globalmanufacturing.com',
-      phone: '(555) 456-7890',
-      address: '321 Factory Blvd, Industrial Park, CA 92225',
-      notes: 'Large electricity consumer',
-    },
-  ];
-};
 
 const ProposalsPage = () => {
-  const [proposals, setProposals] = useState<ProposalFormData[]>(generateMockProposals());
-  const [clients] = useState<ClientFormData[]>(generateMockClients());
-  const [isLoading, setIsLoading] = useState(false);
+  const { proposals, isLoading, createProposal, updateProposal, deleteProposal, sendProposal } = useProposals();
+  const { clients } = useClients();
+  const { createContractFromProposal } = useContracts();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentProposal, setCurrentProposal] = useState<ProposalFormData | undefined>(undefined);
 
@@ -110,36 +33,51 @@ const ProposalsPage = () => {
   };
 
   const handleDeleteProposal = (id: string) => {
-    setProposals(proposals.filter(proposal => proposal.id !== id));
-    toast.success('Proposal deleted successfully');
+    deleteProposal.mutate(id);
   };
 
   const handleSendProposal = (id: string) => {
-    setProposals(proposals.map(proposal => 
-      proposal.id === id 
-        ? { ...proposal, status: 'sent' as 'draft' | 'sent' | 'accepted' | 'rejected' } 
-        : proposal
-    ));
-    toast.success('Proposal sent to client');
+    sendProposal.mutate(id);
   };
 
   const handleConvertToContract = (id: string) => {
-    toast.success('Proposal converted to contract');
+    createContractFromProposal.mutate(id);
   };
 
   const handleSubmitForm = (data: ProposalFormData) => {
     if (data.id) {
-      // Update existing proposal
-      setProposals(proposals.map(proposal => proposal.id === data.id ? data : proposal));
-      toast.success('Proposal updated successfully');
+      updateProposal.mutate(data, {
+        onSuccess: () => setIsFormOpen(false),
+      });
     } else {
-      // Create new proposal
-      const newProposal = { ...data, id: String(proposals.length + 1) };
-      setProposals([...proposals, newProposal]);
-      toast.success('New proposal created successfully');
+      createProposal.mutate(data, {
+        onSuccess: () => setIsFormOpen(false),
+      });
     }
-    setIsFormOpen(false);
   };
+
+  // Transform proposals for the list component
+  const proposalsForList = proposals.map(proposal => ({
+    id: proposal.id,
+    title: proposal.title,
+    clientId: proposal.client_id,
+    description: proposal.description || '',
+    validUntil: proposal.valid_until || '',
+    amount: String(proposal.amount),
+    taxRate: String(proposal.tax_rate),
+    serviceType: proposal.service_type || '',
+    status: proposal.status,
+  }));
+
+  // Transform clients for the form/list
+  const clientsForList = clients.map(client => ({
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    phone: client.phone || '',
+    address: client.address || '',
+    notes: client.notes || '',
+  }));
 
   return (
     <MainLayout>
@@ -153,8 +91,8 @@ const ProposalsPage = () => {
 
       <div className="mt-6">
         <ProposalList
-          proposals={proposals}
-          clients={clients}
+          proposals={proposalsForList}
+          clients={clientsForList}
           onEdit={handleEditProposal}
           onDelete={handleDeleteProposal}
           onSend={handleSendProposal}
@@ -177,7 +115,7 @@ const ProposalsPage = () => {
           </DialogHeader>
           <ProposalForm
             initialData={currentProposal}
-            clients={clients}
+            clients={clientsForList}
             onSubmit={handleSubmitForm}
             onCancel={() => setIsFormOpen(false)}
           />

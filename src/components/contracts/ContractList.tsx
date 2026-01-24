@@ -21,7 +21,7 @@ export interface ContractData {
   amount: string;
   startDate: string;
   endDate: string;
-  status: 'active' | 'expired' | 'terminated';
+  status: 'draft' | 'active' | 'completed' | 'cancelled';
   createdAt: string;
 }
 
@@ -49,10 +49,12 @@ const ContractList: React.FC<ContractListProps> = ({
     switch (status) {
       case 'active':
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>;
-      case 'expired':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Expired</Badge>;
-      case 'terminated':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Terminated</Badge>;
+      case 'completed':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Completed</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Cancelled</Badge>;
+      case 'draft':
+        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Draft</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }

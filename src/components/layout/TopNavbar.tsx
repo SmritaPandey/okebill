@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Menu, User, LogOut, Settings } from 'lucide-react';
@@ -12,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TopNavbarProps {
   onMenuToggle: () => void;
@@ -19,33 +19,34 @@ interface TopNavbarProps {
 
 const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuToggle }) => {
   const navigate = useNavigate();
+  const { profile, signOut } = useAuth();
 
-  const handleLogout = () => {
-    // Clear auth state from localStorage
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('onboardingComplete');
-    
-    // Redirect to login page
+  const handleLogout = async () => {
+    await signOut();
     navigate('/login');
   };
 
+  const initials = profile 
+    ? `${(profile.first_name?.[0] || '').toUpperCase()}${(profile.last_name?.[0] || '').toUpperCase()}` || 'U'
+    : 'U';
+
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+    <header className="bg-background shadow-sm border-b sticky top-0 z-40">
       <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={onMenuToggle}
-            className="mr-2 text-gray-600"
+            className="mr-2"
           >
             <Menu size={20} />
           </Button>
-          <h1 className="text-xl font-semibold text-brand-blue">BillWise</h1>
+          <h1 className="text-xl font-semibold text-primary">OneInvoicer</h1>
         </div>
 
         <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="icon" className="text-gray-600">
+          <Button variant="ghost" size="icon">
             <Bell size={20} />
           </Button>
 
@@ -53,14 +54,16 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuToggle }) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar>
-                  <AvatarFallback className="bg-brand-blue text-white">
-                    JD
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                {profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'My Account' : 'My Account'}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/settings')}>
                 <User className="mr-2 h-4 w-4" />
