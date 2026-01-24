@@ -33,6 +33,7 @@ interface InvoiceListProps {
   onView: (id: string) => void;
   onDownload: (id: string) => void;
   onRecordPayment: (id: string) => void;
+  onSend?: (id: string) => void;
   isLoading?: boolean;
 }
 
@@ -42,6 +43,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   onView,
   onDownload,
   onRecordPayment,
+  onSend,
   isLoading = false,
 }) => {
   const getClientName = (clientId: string) => {

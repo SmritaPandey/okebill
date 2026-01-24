@@ -1,6 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AuthCheckProps {
   children: React.ReactNode;
@@ -20,26 +20,19 @@ const AuthCheck: React.FC<AuthCheckProps> = ({
   requireAuth = true,
   requireOnboarding = true 
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const { user, profile, isLoading } = useAuth();
   const location = useLocation();
 
-  useEffect(() => {
-    // In a real app, you would check with an auth service
-    // For now we'll use localStorage as a mock
-    const authState = localStorage.getItem('isAuthenticated') === 'true';
-    const onboardingState = localStorage.getItem('onboardingComplete') === 'true';
-    
-    setIsAuthenticated(authState);
-    setOnboardingComplete(onboardingState);
-    setIsLoading(false);
-  }, []);
-
   if (isLoading) {
-    // You could add a loading spinner here
-    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
+
+  const isAuthenticated = !!user;
+  const onboardingComplete = profile?.onboarding_complete ?? false;
 
   // If auth is required and user is not authenticated, redirect to login
   if (requireAuth && !isAuthenticated) {
@@ -51,7 +44,7 @@ const AuthCheck: React.FC<AuthCheckProps> = ({
     return <Navigate to="/onboarding" replace />;
   }
 
-  // If user is authenticated and tries to access auth pages (login/register), redirect to dashboard
+  // If user is authenticated and tries to access auth pages (login/register), redirect appropriately
   if (isAuthenticated && location.pathname.match(/^\/(login|register)$/)) {
     if (!onboardingComplete) {
       return <Navigate to="/onboarding" replace />;

@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import PageHeader from '@/components/common/PageHeader';
 import ClientList from '@/components/clients/ClientList';
-import ClientForm, { ClientFormData } from '@/components/clients/ClientForm';
+import ClientForm from '@/components/clients/ClientForm';
 import { Users } from 'lucide-react';
-import { toast } from 'sonner';
+import { useClients, ClientFormData } from '@/hooks/useClients';
+import { useNavigate } from 'react-router-dom';
 import { 
   Dialog,
   DialogContent,
@@ -14,49 +14,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Generate mock client data
-const generateMockClients = () => {
-  return [
-    {
-      id: '1',
-      name: 'Acme Corporation',
-      email: 'contact@acme.com',
-      phone: '(555) 123-4567',
-      address: '123 Main St, Anytown, CA 94105',
-      notes: 'Key enterprise client',
-    },
-    {
-      id: '2',
-      name: 'TechNova Solutions',
-      email: 'info@technova.com',
-      phone: '(555) 987-6543',
-      address: '456 Innovation Dr, Tech City, CA 95123',
-      notes: '',
-    },
-    {
-      id: '3',
-      name: 'EcoEnergy Co.',
-      email: 'support@ecoenergy.com',
-      phone: '(555) 321-7890',
-      address: '789 Green Ave, Ecoville, CA 92001',
-      notes: 'Interested in renewable energy options',
-    },
-    {
-      id: '4',
-      name: 'Global Manufacturing Inc.',
-      email: 'info@globalmanufacturing.com',
-      phone: '(555) 456-7890',
-      address: '321 Factory Blvd, Industrial Park, CA 92225',
-      notes: 'Large electricity consumer',
-    },
-  ];
-};
-
 const ClientsPage = () => {
-  const [clients, setClients] = useState<ClientFormData[]>(generateMockClients());
-  const [isLoading, setIsLoading] = useState(false);
+  const { clients, isLoading, createClient, updateClient, deleteClient } = useClients();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentClient, setCurrentClient] = useState<ClientFormData | undefined>(undefined);
+  const navigate = useNavigate();
 
   const handleCreateClient = () => {
     setCurrentClient(undefined);
@@ -69,28 +31,34 @@ const ClientsPage = () => {
   };
 
   const handleDeleteClient = (id: string) => {
-    setClients(clients.filter(client => client.id !== id));
-    toast.success('Client deleted successfully');
+    deleteClient.mutate(id);
   };
 
   const handleCreateProposal = (clientId: string) => {
-    // In a real app, this would navigate to the proposals page with the client preselected
-    toast.info(`Create proposal for client ID: ${clientId}`);
+    navigate('/proposals', { state: { selectedClientId: clientId } });
   };
 
   const handleSubmitForm = (data: ClientFormData) => {
     if (data.id) {
-      // Update existing client
-      setClients(clients.map(client => client.id === data.id ? data : client));
-      toast.success('Client updated successfully');
+      updateClient.mutate(data, {
+        onSuccess: () => setIsFormOpen(false),
+      });
     } else {
-      // Create new client
-      const newClient = { ...data, id: String(clients.length + 1) };
-      setClients([...clients, newClient]);
-      toast.success('New client added successfully');
+      createClient.mutate(data, {
+        onSuccess: () => setIsFormOpen(false),
+      });
     }
-    setIsFormOpen(false);
   };
+
+  // Transform clients for the list component
+  const clientsForList = clients.map(client => ({
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    phone: client.phone || '',
+    address: client.address || '',
+    notes: client.notes || '',
+  }));
 
   return (
     <MainLayout>
@@ -104,7 +72,7 @@ const ClientsPage = () => {
 
       <div className="mt-6">
         <ClientList
-          clients={clients}
+          clients={clientsForList}
           onEdit={handleEditClient}
           onDelete={handleDeleteClient}
           onCreateProposal={handleCreateProposal}

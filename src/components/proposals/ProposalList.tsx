@@ -50,6 +50,8 @@ const ProposalList: React.FC<ProposalListProps> = ({
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Accepted</Badge>;
       case 'rejected':
         return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Rejected</Badge>;
+      case 'expired':
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Expired</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }

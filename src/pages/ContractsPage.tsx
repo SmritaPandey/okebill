@@ -1,98 +1,56 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import PageHeader from '@/components/common/PageHeader';
-import ContractList, { ContractData } from '@/components/contracts/ContractList';
+import ContractList from '@/components/contracts/ContractList';
 import { FileText } from 'lucide-react';
-import { toast } from 'sonner';
-import { ClientFormData } from '@/components/clients/ClientForm';
-
-// Generate mock contract data
-const generateMockContracts = () => {
-  return [
-    {
-      id: '1',
-      title: 'Water Conservation System Contract',
-      clientId: '4',
-      amount: '15750',
-      startDate: '2025-04-15',
-      endDate: '2026-04-14',
-      status: 'active',
-      createdAt: '2025-04-10',
-    },
-    {
-      id: '2',
-      title: 'Annual Energy Supply Agreement',
-      clientId: '1',
-      amount: '48000',
-      startDate: '2025-01-01',
-      endDate: '2025-12-31',
-      status: 'active',
-      createdAt: '2024-12-15',
-    },
-    {
-      id: '3',
-      title: 'Data Center Cooling Solution',
-      clientId: '2',
-      amount: '36500',
-      startDate: '2024-11-01',
-      endDate: '2025-10-31',
-      status: 'active',
-      createdAt: '2024-10-20',
-    },
-  ] as ContractData[];
-};
-
-// Mock client data
-const generateMockClients = () => {
-  return [
-    {
-      id: '1',
-      name: 'Acme Corporation',
-      email: 'contact@acme.com',
-      phone: '(555) 123-4567',
-      address: '123 Main St, Anytown, CA 94105',
-      notes: 'Key enterprise client',
-    },
-    {
-      id: '2',
-      name: 'TechNova Solutions',
-      email: 'info@technova.com',
-      phone: '(555) 987-6543',
-      address: '456 Innovation Dr, Tech City, CA 95123',
-      notes: '',
-    },
-    {
-      id: '3',
-      name: 'EcoEnergy Co.',
-      email: 'support@ecoenergy.com',
-      phone: '(555) 321-7890',
-      address: '789 Green Ave, Ecoville, CA 92001',
-      notes: 'Interested in renewable energy options',
-    },
-    {
-      id: '4',
-      name: 'Global Manufacturing Inc.',
-      email: 'info@globalmanufacturing.com',
-      phone: '(555) 456-7890',
-      address: '321 Factory Blvd, Industrial Park, CA 92225',
-      notes: 'Large electricity consumer',
-    },
-  ];
-};
+import { useContracts } from '@/hooks/useContracts';
+import { useClients } from '@/hooks/useClients';
+import { useInvoices } from '@/hooks/useInvoices';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 const ContractsPage = () => {
-  const [contracts] = useState<ContractData[]>(generateMockContracts());
-  const [clients] = useState<ClientFormData[]>(generateMockClients());
-  const [isLoading, setIsLoading] = useState(false);
+  const { contracts, isLoading } = useContracts();
+  const { clients } = useClients();
+  const { createInvoiceFromContract } = useInvoices();
+  const [selectedContract, setSelectedContract] = useState<string | null>(null);
 
   const handleViewContract = (id: string) => {
-    toast.info(`Viewing contract: ${id}`);
+    setSelectedContract(id);
   };
 
   const handleCreateInvoice = (id: string) => {
-    toast.success('Invoice created from contract');
+    createInvoiceFromContract.mutate(id);
   };
+
+  // Transform contracts for the list component
+  const contractsForList = contracts.map(contract => ({
+    id: contract.id,
+    title: contract.title,
+    clientId: contract.client_id,
+    amount: String(contract.amount),
+    startDate: contract.start_date,
+    endDate: contract.end_date || '',
+    status: contract.status,
+    createdAt: contract.created_at.split('T')[0],
+  }));
+
+  // Transform clients for the list
+  const clientsForList = clients.map(client => ({
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    phone: client.phone || '',
+    address: client.address || '',
+    notes: client.notes || '',
+  }));
+
+  const selectedContractData = contracts.find(c => c.id === selectedContract);
 
   return (
     <MainLayout>
@@ -104,13 +62,56 @@ const ContractsPage = () => {
 
       <div className="mt-6">
         <ContractList
-          contracts={contracts}
-          clients={clients}
+          contracts={contractsForList}
+          clients={clientsForList}
           onView={handleViewContract}
           onCreateInvoice={handleCreateInvoice}
           isLoading={isLoading}
         />
       </div>
+
+      <Dialog open={!!selectedContract} onOpenChange={() => setSelectedContract(null)}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Contract Details</DialogTitle>
+            <DialogDescription>
+              View contract information
+            </DialogDescription>
+          </DialogHeader>
+          {selectedContractData && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Title</p>
+                  <p className="text-base">{selectedContractData.title}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Amount</p>
+                  <p className="text-base">${Number(selectedContractData.amount).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Start Date</p>
+                  <p className="text-base">{new Date(selectedContractData.start_date).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">End Date</p>
+                  <p className="text-base">{selectedContractData.end_date ? new Date(selectedContractData.end_date).toLocaleDateString() : 'Ongoing'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <p className="text-base capitalize">{selectedContractData.status}</p>
+                </div>
+              </div>
+              {selectedContractData.description && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Description</p>
+                  <p className="text-base">{selectedContractData.description}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 };
