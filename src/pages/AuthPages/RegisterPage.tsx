@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, User, Building, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const RegisterPage = () => {
   const [firstName, setFirstName] = useState('');
@@ -18,8 +18,9 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signUp } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -61,28 +62,37 @@ const RegisterPage = () => {
     
     setIsLoading(true);
     
-    // Mock registration function - in real app this would connect to auth service
-    setTimeout(() => {
-      // Store auth state and user data in localStorage
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('onboardingComplete', 'false');
-      localStorage.setItem('userData', JSON.stringify({
-        firstName,
-        lastName,
-        email,
-        companyName
-      }));
-      
-      setIsLoading(false);
-      
-      toast({
-        title: "Account created successfully!",
-        description: "Welcome to BillWise. Let's get you set up."
-      });
-      
-      // Redirect directly to onboarding
-      navigate('/onboarding');
-    }, 1000);
+    // Store company name in localStorage for onboarding
+    localStorage.setItem('pendingCompanyName', companyName);
+    
+    const { error } = await signUp(email, password, { first_name: firstName, last_name: lastName });
+    
+    setIsLoading(false);
+    
+    if (error) {
+      // Handle specific error cases
+      if (error.message.includes('already registered')) {
+        toast({
+          title: "Account exists",
+          description: "This email is already registered. Please sign in instead.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Registration failed",
+          description: error.message || "Something went wrong. Please try again.",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
+    
+    toast({
+      title: "Account created successfully!",
+      description: "Welcome to OneInvoicer. Let's get you set up."
+    });
+    
+    // Navigation to onboarding is handled by AuthCheck
   };
 
   const handleSocialSignup = (provider: string) => {
@@ -109,7 +119,7 @@ const RegisterPage = () => {
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-bold text-blue-600">BillWise</h1>
+        <h1 className="text-center text-3xl font-bold text-blue-600">OneInvoicer</h1>
         <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
           Create your account
         </h2>
