@@ -44,8 +44,8 @@ const AuthCheck: React.FC<AuthCheckProps> = ({
     return <Navigate to="/onboarding" replace />;
   }
 
-  // If user is authenticated and tries to access auth pages (login/register), redirect appropriately
-  if (isAuthenticated && location.pathname.match(/^\/(login|register)$/)) {
+  // If user is authenticated and tries to access public auth pages (login/register/landing), redirect appropriately
+  if (isAuthenticated && (location.pathname === '/' || location.pathname === '/login' || location.pathname === '/register')) {
     if (!onboardingComplete) {
       return <Navigate to="/onboarding" replace />;
     }

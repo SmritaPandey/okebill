@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -13,8 +13,9 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
@@ -28,30 +29,25 @@ const LoginPage = () => {
 
     setIsLoading(true);
     
-    // Mock login function - in real app this would connect to auth service
-    setTimeout(() => {
-      // Store auth state in localStorage
-      localStorage.setItem('isAuthenticated', 'true');
-      
-      // Check if user has completed onboarding (mock check)
-      const onboardingComplete = localStorage.getItem('onboardingComplete') === 'true';
-      
-      setIsLoading(false);
-      
-      if (onboardingComplete) {
-        navigate('/dashboard');
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully logged in."
-        });
-      } else {
-        navigate('/onboarding');
-        toast({
-          title: "Welcome!",
-          description: "Please complete your onboarding."
-        });
-      }
-    }, 1000);
+    const { error } = await signIn(email, password);
+    
+    setIsLoading(false);
+    
+    if (error) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid email or password",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    toast({
+      title: "Welcome back!",
+      description: "You have successfully logged in."
+    });
+    
+    // Navigation is handled by AuthCheck based on onboarding status
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -71,7 +67,7 @@ const LoginPage = () => {
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-bold text-blue-600">BillWise</h1>
+        <h1 className="text-center text-3xl font-bold text-blue-600">OneInvoicer</h1>
         <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
           Sign in to your account
         </h2>
