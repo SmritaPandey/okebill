@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import PageHeader from '@/components/common/PageHeader';
 import ContractList from '@/components/contracts/ContractList';
+import ContractForm from '@/components/contracts/ContractForm';
 import { FileText } from 'lucide-react';
-import { useContracts } from '@/hooks/useContracts';
+import { useContracts, ContractFormData } from '@/hooks/useContracts';
 import { useClients } from '@/hooks/useClients';
 import { useInvoices } from '@/hooks/useInvoices';
 import {
@@ -13,19 +14,65 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const ContractsPage = () => {
-  const { contracts, isLoading } = useContracts();
+  const { contracts, isLoading, updateContract, deleteContract } = useContracts();
   const { clients } = useClients();
   const { createInvoiceFromContract } = useInvoices();
   const [selectedContract, setSelectedContract] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editContract, setEditContract] = useState<ContractFormData | null>(null);
+  const [deleteContractId, setDeleteContractId] = useState<string | null>(null);
 
   const handleViewContract = (id: string) => {
     setSelectedContract(id);
   };
 
+  const handleEditContract = (contract: any) => {
+    setEditContract({
+      id: contract.id,
+      clientId: contract.clientId,
+      title: contract.title,
+      description: '',
+      amount: contract.amount,
+      startDate: contract.startDate,
+      endDate: contract.endDate || '',
+      status: contract.status,
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteContract = (id: string) => {
+    setDeleteContractId(id);
+  };
+
+  const confirmDeleteContract = () => {
+    if (deleteContractId) {
+      deleteContract.mutate(deleteContractId);
+      setDeleteContractId(null);
+    }
+  };
+
   const handleCreateInvoice = (id: string) => {
     createInvoiceFromContract.mutate(id);
+  };
+
+  const handleSubmitForm = (data: ContractFormData) => {
+    if (data.id) {
+      updateContract.mutate(data, {
+        onSuccess: () => setIsFormOpen(false),
+      });
+    }
   };
 
   // Transform contracts for the list component
@@ -65,11 +112,14 @@ const ContractsPage = () => {
           contracts={contractsForList}
           clients={clientsForList}
           onView={handleViewContract}
+          onEdit={handleEditContract}
+          onDelete={handleDeleteContract}
           onCreateInvoice={handleCreateInvoice}
           isLoading={isLoading}
         />
       </div>
 
+      {/* View Contract Dialog */}
       <Dialog open={!!selectedContract} onOpenChange={() => setSelectedContract(null)}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
@@ -87,15 +137,20 @@ const ContractsPage = () => {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Amount</p>
-                  <p className="text-base">${Number(selectedContractData.amount).toLocaleString()}</p>
+                  <p className="text-base">
+                    {new Intl.NumberFormat('en-IN', {
+                      style: 'currency',
+                      currency: 'INR',
+                    }).format(Number(selectedContractData.amount))}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Start Date</p>
-                  <p className="text-base">{new Date(selectedContractData.start_date).toLocaleDateString()}</p>
+                  <p className="text-base">{new Date(selectedContractData.start_date).toLocaleDateString('en-IN')}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">End Date</p>
-                  <p className="text-base">{selectedContractData.end_date ? new Date(selectedContractData.end_date).toLocaleDateString() : 'Ongoing'}</p>
+                  <p className="text-base">{selectedContractData.end_date ? new Date(selectedContractData.end_date).toLocaleDateString('en-IN') : 'Ongoing'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Status</p>
@@ -112,6 +167,44 @@ const ContractsPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Contract Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Edit Contract</DialogTitle>
+            <DialogDescription>
+              Update the contract details below.
+            </DialogDescription>
+          </DialogHeader>
+          {editContract && (
+            <ContractForm
+              initialData={editContract}
+              clients={clientsForList}
+              onSubmit={handleSubmitForm}
+              onCancel={() => setIsFormOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteContractId} onOpenChange={() => setDeleteContractId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contract?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the contract and may affect related invoices.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteContract} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>
   );
 };

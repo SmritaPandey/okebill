@@ -1,24 +1,26 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Eye, Download, CreditCard } from 'lucide-react';
+import { Eye, Printer, CreditCard, Edit, Trash2, Send, Download, FileText, Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import SkeletonLoader from '../common/SkeletonLoader';
 import { ClientFormData } from '../clients/ClientForm';
+import { documentsApi } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 export interface InvoiceData {
   id: string;
   invoiceNumber: string;
   clientId: string;
-  contractId: string;
+  contractId?: string;
   amount: string;
   tax: string;
   total: string;
@@ -31,9 +33,11 @@ interface InvoiceListProps {
   invoices: InvoiceData[];
   clients: ClientFormData[];
   onView: (id: string) => void;
+  onEdit?: (id: string) => void;
   onDownload: (id: string) => void;
   onRecordPayment: (id: string) => void;
   onSend?: (id: string) => void;
+  onDelete?: (id: string) => void;
   isLoading?: boolean;
 }
 
@@ -41,20 +45,36 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   invoices,
   clients,
   onView,
+  onEdit,
   onDownload,
   onRecordPayment,
   onSend,
+  onDelete,
   isLoading = false,
 }) => {
   const getClientName = (clientId: string) => {
-    const client = clients.find((c) => c.id === clientId);
+    const client = clients.find((c) => String(c.id) === String(clientId));
     return client ? client.name : 'Unknown Client';
+  };
+
+  const formatCurrency = (amount: string) => {
+    const num = parseFloat(amount);
+    if (isNaN(num)) return '—';
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+    }).format(num);
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case 'draft':
+        return <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">Draft</Badge>;
       case 'pending':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Pending</Badge>;
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Pending</Badge>;
+      case 'sent':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Sent</Badge>;
       case 'paid':
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Paid</Badge>;
       case 'overdue':
@@ -66,6 +86,39 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
     }
   };
 
+  const handleDownloadPdf = async (invoiceId: string) => {
+    try {
+      const blob = await documentsApi.downloadInvoicePdf(Number(invoiceId));
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${invoiceId}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Invoice PDF downloaded');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to download PDF');
+    }
+  };
+
+  const handleSendEmail = async (invoiceId: string) => {
+    try {
+      const result = await documentsApi.sendInvoice(Number(invoiceId));
+      toast.success(result.message);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send invoice');
+    }
+  };
+
+  const handleSendReminder = async (invoiceId: string) => {
+    try {
+      const result = await documentsApi.sendReminder(Number(invoiceId));
+      toast.success(result.message);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send reminder');
+    }
+  };
+
   if (isLoading) {
     return <SkeletonLoader count={5} className="mb-3" />;
   }
@@ -73,7 +126,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   if (invoices.length === 0) {
     return (
       <div className="text-center py-10 border rounded-md bg-gray-50">
-        <p className="text-gray-500">No invoices found. Create new invoices from contracts to get started.</p>
+        <p className="text-gray-500">No invoices found. Create new invoices to get started.</p>
       </div>
     );
   }
@@ -95,16 +148,16 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
         <TableBody>
           {invoices.map((invoice) => (
             <TableRow key={invoice.id}>
-              <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
+              <TableCell className="font-medium">{invoice.invoiceNumber || '—'}</TableCell>
               <TableCell>{getClientName(invoice.clientId)}</TableCell>
-              <TableCell>
-                {invoice.total ? `$${parseFloat(invoice.total).toFixed(2)}` : '—'}
+              <TableCell className="font-medium">
+                {formatCurrency(invoice.total)}
               </TableCell>
               <TableCell>
-                {invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString() : '—'}
+                {invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString('en-IN') : '—'}
               </TableCell>
               <TableCell>
-                {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : '—'}
+                {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('en-IN') : '—'}
               </TableCell>
               <TableCell>{getStatusBadge(invoice.status)}</TableCell>
               <TableCell className="text-right">
@@ -135,16 +188,58 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                       <Eye className="mr-2 h-4 w-4" />
                       View Invoice
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDownload(invoice.id)}>
+                    {onEdit && ['pending', 'draft'].includes(invoice.status) && (
+                      <DropdownMenuItem onClick={() => onEdit(invoice.id)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Invoice
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem onClick={() => handleDownloadPdf(invoice.id)}>
                       <Download className="mr-2 h-4 w-4" />
                       Download PDF
                     </DropdownMenuItem>
-                    
-                    {invoice.status === 'pending' && (
+                    <DropdownMenuItem onClick={() => onDownload(invoice.id)}>
+                      <Printer className="mr-2 h-4 w-4" />
+                      Print Invoice
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    {['pending', 'draft'].includes(invoice.status) && (
+                      <DropdownMenuItem onClick={() => handleSendEmail(invoice.id)}>
+                        <Send className="mr-2 h-4 w-4" />
+                        Send to Client
+                      </DropdownMenuItem>
+                    )}
+
+                    {invoice.status === 'overdue' && (
+                      <DropdownMenuItem onClick={() => handleSendReminder(invoice.id)}>
+                        <Bell className="mr-2 h-4 w-4" />
+                        Send Reminder
+                      </DropdownMenuItem>
+                    )}
+
+                    {['pending', 'sent', 'overdue'].includes(invoice.status) && (
                       <DropdownMenuItem onClick={() => onRecordPayment(invoice.id)}>
                         <CreditCard className="mr-2 h-4 w-4" />
                         Record Payment
                       </DropdownMenuItem>
+                    )}
+
+                    {onDelete && ['draft', 'cancelled'].includes(invoice.status) && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => onDelete(invoice.id)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete Invoice
+                        </DropdownMenuItem>
+                      </>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>

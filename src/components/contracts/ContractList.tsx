@@ -1,14 +1,14 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Eye, FileText, Receipt } from 'lucide-react';
+import { Eye, Edit, Trash2, Receipt } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import SkeletonLoader from '../common/SkeletonLoader';
@@ -29,6 +29,8 @@ interface ContractListProps {
   contracts: ContractData[];
   clients: ClientFormData[];
   onView: (id: string) => void;
+  onEdit?: (contract: ContractData) => void;
+  onDelete?: (id: string) => void;
   onCreateInvoice: (id: string) => void;
   isLoading?: boolean;
 }
@@ -37,12 +39,24 @@ const ContractList: React.FC<ContractListProps> = ({
   contracts,
   clients,
   onView,
+  onEdit,
+  onDelete,
   onCreateInvoice,
   isLoading = false,
 }) => {
   const getClientName = (clientId: string) => {
-    const client = clients.find((c) => c.id === clientId);
+    const client = clients.find((c) => String(c.id) === String(clientId));
     return client ? client.name : 'Unknown Client';
+  };
+
+  const formatCurrency = (amount: string) => {
+    const num = parseFloat(amount);
+    if (isNaN(num)) return '—';
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+    }).format(num);
   };
 
   const getStatusBadge = (status: string) => {
@@ -50,7 +64,7 @@ const ContractList: React.FC<ContractListProps> = ({
       case 'active':
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>;
       case 'completed':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Completed</Badge>;
+        return <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">Completed</Badge>;
       case 'cancelled':
         return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Cancelled</Badge>;
       case 'draft':
@@ -91,14 +105,14 @@ const ContractList: React.FC<ContractListProps> = ({
             <TableRow key={contract.id}>
               <TableCell className="font-medium">{contract.title}</TableCell>
               <TableCell>{getClientName(contract.clientId)}</TableCell>
-              <TableCell>
-                {contract.amount ? `$${parseFloat(contract.amount).toFixed(2)}` : '—'}
+              <TableCell className="font-medium">
+                {formatCurrency(contract.amount)}
               </TableCell>
               <TableCell>
-                {contract.startDate ? new Date(contract.startDate).toLocaleDateString() : '—'}
+                {contract.startDate ? new Date(contract.startDate).toLocaleDateString('en-IN') : '—'}
               </TableCell>
               <TableCell>
-                {contract.endDate ? new Date(contract.endDate).toLocaleDateString() : '—'}
+                {contract.endDate ? new Date(contract.endDate).toLocaleDateString('en-IN') : 'Ongoing'}
               </TableCell>
               <TableCell>{getStatusBadge(contract.status)}</TableCell>
               <TableCell className="text-right">
@@ -129,12 +143,32 @@ const ContractList: React.FC<ContractListProps> = ({
                       <Eye className="mr-2 h-4 w-4" />
                       View Contract
                     </DropdownMenuItem>
-                    
+
+                    {onEdit && (contract.status === 'draft' || contract.status === 'active') && (
+                      <DropdownMenuItem onClick={() => onEdit(contract)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Contract
+                      </DropdownMenuItem>
+                    )}
+
                     {contract.status === 'active' && (
                       <DropdownMenuItem onClick={() => onCreateInvoice(contract.id)}>
                         <Receipt className="mr-2 h-4 w-4" />
                         Create Invoice
                       </DropdownMenuItem>
+                    )}
+
+                    {onDelete && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => onDelete(contract.id)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete Contract
+                        </DropdownMenuItem>
+                      </>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>

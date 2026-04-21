@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { contractsApi, proposalsApi } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -38,13 +38,21 @@ export const useContracts = () => {
     queryKey: ['contracts', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from('contracts')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Contract[];
+      const response = await contractsApi.list();
+      return (response.contracts || []).map((c: any) => ({
+        id: String(c.id),
+        user_id: String(c.userId || ''),
+        client_id: String(c.clientId || ''),
+        proposal_id: c.proposalId ? String(c.proposalId) : null,
+        title: c.title,
+        description: c.terms || null,
+        amount: c.value || 0,
+        start_date: c.startDate,
+        end_date: c.endDate || null,
+        status: c.status,
+        created_at: c.createdAt,
+        updated_at: c.updatedAt,
+      })) as Contract[];
     },
     enabled: !!user,
   });
@@ -52,24 +60,11 @@ export const useContracts = () => {
   const createContract = useMutation({
     mutationFn: async (contractData: ContractFormData) => {
       if (!user) throw new Error('User not authenticated');
-      const { data, error } = await supabase
-        .from('contracts')
-        .insert({
-          user_id: user.id,
-          client_id: contractData.clientId,
-          proposal_id: contractData.proposalId || null,
-          title: contractData.title,
-          description: contractData.description || null,
-          amount: parseFloat(contractData.amount) || 0,
-          start_date: contractData.startDate,
-          end_date: contractData.endDate || null,
-          status: contractData.status || 'draft',
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      return contractsApi.generate({
+        proposalId: Number(contractData.proposalId) || 0,
+        startDate: contractData.startDate,
+        endDate: contractData.endDate,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
@@ -83,23 +78,14 @@ export const useContracts = () => {
   const updateContract = useMutation({
     mutationFn: async (contractData: ContractFormData) => {
       if (!contractData.id) throw new Error('Contract ID is required');
-      const { data, error } = await supabase
-        .from('contracts')
-        .update({
-          client_id: contractData.clientId,
-          title: contractData.title,
-          description: contractData.description || null,
-          amount: parseFloat(contractData.amount) || 0,
-          start_date: contractData.startDate,
-          end_date: contractData.endDate || null,
-          status: contractData.status,
-        })
-        .eq('id', contractData.id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      return contractsApi.update(Number(contractData.id), {
+        title: contractData.title,
+        terms: contractData.description || undefined,
+        value: parseFloat(contractData.amount) || 0,
+        startDate: contractData.startDate,
+        endDate: contractData.endDate,
+        status: contractData.status,
+      } as any);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
@@ -113,41 +99,10 @@ export const useContracts = () => {
   const createContractFromProposal = useMutation({
     mutationFn: async (proposalId: string) => {
       if (!user) throw new Error('User not authenticated');
-      
-      // Get the proposal
-      const { data: proposal, error: proposalError } = await supabase
-        .from('proposals')
-        .select('*')
-        .eq('id', proposalId)
-        .single();
-      
-      if (proposalError) throw proposalError;
-      
-      // Create contract from proposal
-      const { data: contract, error: contractError } = await supabase
-        .from('contracts')
-        .insert({
-          user_id: user.id,
-          client_id: proposal.client_id,
-          proposal_id: proposalId,
-          title: proposal.title,
-          description: proposal.description,
-          amount: proposal.amount,
-          start_date: new Date().toISOString().split('T')[0],
-          status: 'active' as const,
-        })
-        .select()
-        .single();
-      
-      if (contractError) throw contractError;
-      
-      // Update proposal status to accepted
-      await supabase
-        .from('proposals')
-        .update({ status: 'accepted' as const })
-        .eq('id', proposalId);
-      
-      return contract;
+      return contractsApi.generate({
+        proposalId: Number(proposalId),
+        startDate: new Date().toISOString().split('T')[0],
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contracts'] });
@@ -159,12 +114,26 @@ export const useContracts = () => {
     },
   });
 
+  const deleteContract = useMutation({
+    mutationFn: async (contractId: string) => {
+      await contractsApi.delete(Number(contractId));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+      toast.success('Contract deleted successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete contract: ${error.message}`);
+    },
+  });
+
   return {
     contracts: contractsQuery.data || [],
     isLoading: contractsQuery.isLoading,
     error: contractsQuery.error,
     createContract,
     updateContract,
+    deleteContract,
     createContractFromProposal,
   };
 };

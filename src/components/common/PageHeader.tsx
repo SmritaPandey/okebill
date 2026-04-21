@@ -9,6 +9,7 @@ interface PageHeaderProps {
   icon?: LucideIcon;
   actionLabel?: string;
   onAction?: () => void;
+  extraActions?: React.ReactNode;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -16,13 +17,14 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   description,
   icon: Icon,
   actionLabel,
-  onAction
+  onAction,
+  extraActions
 }) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <div className="flex items-center">
         {Icon && (
-          <div className="mr-3 p-2 bg-brand-blue/10 rounded-md text-brand-blue">
+          <div className="mr-3 p-2 bg-brand-navy/10 rounded-md text-brand-navy">
             <Icon size={24} />
           </div>
         )}
@@ -33,11 +35,14 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           )}
         </div>
       </div>
-      {actionLabel && onAction && (
-        <Button onClick={onAction} className="bg-brand-blue hover:bg-brand-blue-dark">
-          {actionLabel}
-        </Button>
-      )}
+      <div className="flex items-center gap-2">
+        {extraActions}
+        {actionLabel && onAction && (
+          <Button onClick={onAction} className="bg-brand-navy hover:bg-brand-navy-dark">
+            {actionLabel}
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

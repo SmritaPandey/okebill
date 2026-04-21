@@ -1,0 +1,92 @@
+# =============================================
+# OneInvoicer — Docker Compose
+# =============================================
+# Full-stack: PostgreSQL + Express.js Backend + Vite React Frontend
+#
+# Usage:
+#   docker compose up -d          # Start all services
+#   docker compose down           # Stop all services
+#   docker compose logs -f        # Follow logs
+#   docker compose ps             # Check service health
+# =============================================
+
+services:
+  # ── PostgreSQL Database ──────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: oneinvoicer-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-one_invoicer}
+      POSTGRES_USER: ${POSTGRES_USER:-oneinvoicer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-oneinvoicer_secret}
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-oneinvoicer} -d ${POSTGRES_DB:-one_invoicer}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - oneinvoicer
+
+  # ── Express.js + Prisma Backend API ──────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: oneinvoicer-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-oneinvoicer}:${POSTGRES_PASSWORD:-oneinvoicer_secret}@db:5432/${POSTGRES_DB:-one_invoicer}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-please}
+      PORT: 4000
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      NODE_ENV: production
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:4000/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - oneinvoicer
+
+  # ── Vite React Frontend (Nginx) ──────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+    container_name: oneinvoicer-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost/" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - oneinvoicer
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  oneinvoicer:
+    driver: bridge

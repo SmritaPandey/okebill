@@ -4,19 +4,28 @@ import PageHeader from '@/components/common/PageHeader';
 import StatCard from '@/components/dashboard/StatCard';
 import RevenueChart from '@/components/dashboard/RevenueChart';
 import StatusPieChart from '@/components/dashboard/StatusPieChart';
-import { 
-  LayoutDashboard, 
-  Users, 
-  FileText, 
-  Receipt, 
-  CreditCard, 
-  FileCheck
+import CashFlowChart from '@/components/dashboard/CashFlowChart';
+import OverdueAlerts from '@/components/dashboard/OverdueAlerts';
+import GstSummaryCard from '@/components/dashboard/GstSummaryCard';
+import ClientRevenueChart from '@/components/dashboard/ClientRevenueChart';
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  Receipt,
+  CreditCard,
+  AlertTriangle,
+  TrendingUp,
+  IndianRupee,
 } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import SkeletonLoader from '@/components/common/SkeletonLoader';
 
+const formatINR = (amount: number) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+
 const Dashboard = () => {
-  const { stats, revenueData, invoiceStatusData, isLoading } = useDashboardStats();
+  const { stats, kpi, aging, cashFlow, topClients, revenueData, invoiceStatusData, isLoading } = useDashboardStats();
 
   if (isLoading || !stats) {
     return (
@@ -26,45 +35,67 @@ const Dashboard = () => {
           description="Overview of your business metrics"
           icon={LayoutDashboard}
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          {[1, 2, 3, 4, 5].map(i => (
-            <SkeletonLoader key={i} className="h-32" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <SkeletonLoader key={i} className="h-28" />
           ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <SkeletonLoader className="h-72 col-span-2" />
+          <SkeletonLoader className="h-72" />
         </div>
       </MainLayout>
     );
   }
 
   const statCards = [
-    { 
-      title: 'Total Clients', 
-      value: String(stats.totalClients), 
-      icon: Users, 
-      change: { value: stats.clientsChange, isPositive: stats.clientsChange > 0 } 
+    {
+      title: 'Revenue (MTD)',
+      value: formatINR(kpi?.revenueThisMonth || stats.revenueThisMonth),
+      icon: CreditCard,
+      accent: 'emerald' as const,
+      change: { value: Math.abs(kpi?.revenueChange || stats.revenueChange), isPositive: (kpi?.revenueChange || stats.revenueChange) > 0 },
     },
-    { 
-      title: 'Active Proposals', 
-      value: String(stats.activeProposals), 
-      icon: FileText, 
-      change: { value: stats.proposalsChange, isPositive: stats.proposalsChange > 0 } 
+    {
+      title: 'Outstanding',
+      value: formatINR(kpi?.outstanding || 0),
+      icon: IndianRupee,
+      accent: 'amber' as const,
+      subtitle: `${kpi?.overdueCount || 0} overdue`,
     },
-    { 
-      title: 'Active Contracts', 
-      value: String(stats.activeContracts), 
-      icon: FileCheck, 
-      change: { value: stats.contractsChange, isPositive: stats.contractsChange > 0 } 
+    {
+      title: 'Overdue',
+      value: formatINR(kpi?.overdueAmount || 0),
+      icon: AlertTriangle,
+      accent: 'rose' as const,
+      subtitle: `${kpi?.overdueCount || 0} invoices past due`,
     },
-    { 
-      title: 'Pending Invoices', 
-      value: String(stats.pendingInvoices), 
-      icon: Receipt, 
-      change: { value: Math.abs(stats.invoicesChange), isPositive: stats.invoicesChange <= 0 } 
+    {
+      title: 'Total Clients',
+      value: String(kpi?.totalClients || stats.totalClients),
+      icon: Users,
+      accent: 'sky' as const,
+      change: {
+        value: Math.abs(kpi?.clientsChange || stats.clientsChange),
+        isPositive: (kpi?.clientsChange || stats.clientsChange) >= 0,
+      },
     },
-    { 
-      title: 'Revenue (MTD)', 
-      value: `$${stats.revenueThisMonth.toLocaleString()}`, 
-      icon: CreditCard, 
-      change: { value: stats.revenueChange, isPositive: stats.revenueChange > 0 } 
+    {
+      title: 'Total Invoices',
+      value: String(kpi?.totalInvoices || 0),
+      icon: FileText,
+      accent: 'emerald' as const,
+      change: {
+        value: Math.abs(kpi?.invoicesChange || stats.invoicesChange),
+        isPositive: (kpi?.invoicesChange || stats.invoicesChange) >= 0,
+      },
+    },
+    {
+      title: 'Cash Flow (30d)',
+      value: formatINR(cashFlow?.projection?.next30 || stats.cashFlowProjection),
+      icon: TrendingUp,
+      accent: 'sky' as const,
+      subtitle: `${formatINR(cashFlow?.projection?.total || 0)} projected (90d)`,
     },
   ];
 
@@ -76,21 +107,48 @@ const Dashboard = () => {
         icon={LayoutDashboard}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      {/* ═══════ Row 1: KPI Cards ═══════ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {statCards.map((stat, index) => (
           <StatCard
             key={index}
             title={stat.title}
             value={stat.value}
             icon={stat.icon}
+            accent={stat.accent}
             change={stat.change}
+            subtitle={stat.subtitle}
           />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* ═══════ Row 2: Revenue Chart + Invoice Status ═══════ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <RevenueChart data={revenueData.length > 0 ? revenueData : undefined} />
         <StatusPieChart data={invoiceStatusData.length > 0 ? invoiceStatusData : undefined} />
+      </div>
+
+      {/* ═══════ Row 3: Cash Flow + Aging + GST Summary ═══════ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <CashFlowChart
+          monthlyRevenue={cashFlow?.monthlyRevenue}
+          projection={cashFlow?.projection}
+        />
+        <OverdueAlerts
+          buckets={aging?.buckets}
+          totals={aging?.totals}
+        />
+      </div>
+
+      {/* ═══════ Row 4: Top Clients + GST Liability ═══════ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <ClientRevenueChart clients={topClients} />
+        <GstSummaryCard
+          cgst={kpi?.gstLiability?.cgst}
+          sgst={kpi?.gstLiability?.sgst}
+          igst={kpi?.gstLiability?.igst}
+          totalTax={kpi?.gstLiability?.total}
+        />
       </div>
     </MainLayout>
   );

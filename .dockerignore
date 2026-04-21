@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+backend/node_modules
+
+# Build output
+dist
+dist-ssr
+
+# Version control
+.git
+.gitignore
+
+# Environment files (secrets)
+.env
+.env.local
+.env.production
+
+# IDE / Editor
+.vscode
+.idea
+*.sw?
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Source reference (not needed in container)
+multi-utility-source
+
+# Lock files for other package managers
+bun.lockb
+yarn.lock
+pnpm-lock.yaml
+
+# Docker files (prevent recursive copy)
+Dockerfile
+Dockerfile.backend
+docker-compose.yml
+.dockerignore
+
+# Docs / Artifacts
+README.md
+*.md

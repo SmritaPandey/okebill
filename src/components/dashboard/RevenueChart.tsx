@@ -3,21 +3,21 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
-// Sample data for the chart
 const defaultData = [
-  { month: 'Jan', revenue: 12000 },
-  { month: 'Feb', revenue: 19000 },
-  { month: 'Mar', revenue: 15000 },
-  { month: 'Apr', revenue: 22000 },
-  { month: 'May', revenue: 18000 },
-  { month: 'Jun', revenue: 25000 },
-  { month: 'Jul', revenue: 20000 },
-  { month: 'Aug', revenue: 28000 },
-  { month: 'Sep', revenue: 23000 },
-  { month: 'Oct', revenue: 30000 },
-  { month: 'Nov', revenue: 26000 },
-  { month: 'Dec', revenue: 35000 },
+  { month: 'Jan', revenue: 0 }, { month: 'Feb', revenue: 0 },
+  { month: 'Mar', revenue: 0 }, { month: 'Apr', revenue: 0 },
+  { month: 'May', revenue: 0 }, { month: 'Jun', revenue: 0 },
+  { month: 'Jul', revenue: 0 }, { month: 'Aug', revenue: 0 },
+  { month: 'Sep', revenue: 0 }, { month: 'Oct', revenue: 0 },
+  { month: 'Nov', revenue: 0 }, { month: 'Dec', revenue: 0 },
 ];
+
+const formatINR = (value: number) => {
+  if (value >= 10000000) return `₹${(value / 10000000).toFixed(1)}Cr`;
+  if (value >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
+  if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
+  return `₹${value}`;
+};
 
 interface RevenueChartProps {
   data?: Array<{ month: string; revenue: number }>;
@@ -29,42 +29,50 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
   title = "Monthly Revenue",
 }) => {
   return (
-    <Card className="col-span-1 md:col-span-2">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
+    <Card className="col-span-1 md:col-span-2 border-gray-200/60 bg-white/80 backdrop-blur-sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-semibold text-gray-700">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
+        <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis 
-                dataKey="month" 
+            <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+              <defs>
+                <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1E3A5F" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#818cf8" stopOpacity={0.6} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis
+                dataKey="month"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#64748b' }}
+                tick={{ fill: '#94a3b8', fontSize: 12 }}
               />
-              <YAxis 
+              <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#64748b' }}
-                tickFormatter={(value) => `$${value / 1000}k`}
+                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                tickFormatter={(value) => formatINR(value)}
+                width={55}
               />
-              <Tooltip 
-                formatter={(value) => [`$${value}`, 'Revenue']} 
-                labelStyle={{ color: '#1e293b' }}
-                contentStyle={{ 
-                  backgroundColor: 'white', 
-                  borderRadius: '0.375rem',
-                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                  border: '1px solid #e2e8f0'
+              <Tooltip
+                formatter={(value: number) => [formatINR(value), 'Revenue']}
+                labelStyle={{ color: '#1e293b', fontWeight: 600 }}
+                contentStyle={{
+                  backgroundColor: 'white',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                  border: '1px solid #e2e8f0',
+                  padding: '8px 12px',
                 }}
               />
-              <Bar 
-                dataKey="revenue" 
-                fill="#2563EB" 
-                radius={[4, 4, 0, 0]}
-                maxBarSize={50}
+              <Bar
+                dataKey="revenue"
+                fill="url(#revenueGradient)"
+                radius={[6, 6, 0, 0]}
+                maxBarSize={42}
               />
             </BarChart>
           </ResponsiveContainer>

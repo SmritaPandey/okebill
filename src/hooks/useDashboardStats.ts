@@ -1,18 +1,57 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export interface DashboardStats {
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+function getAuthToken(): string | null {
+  return localStorage.getItem('auth_token');
+}
+
+async function dashboardFetch<T>(path: string): Promise<T> {
+  const token = getAuthToken();
+  const resp = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  if (!resp.ok) throw new Error(`API error: ${resp.status}`);
+  return resp.json();
+}
+
+// ─── Types ────────────────────────────────────────────────
+export interface DashboardKPI {
   totalClients: number;
-  activeProposals: number;
-  activeContracts: number;
-  pendingInvoices: number;
-  revenueThisMonth: number;
   clientsChange: number;
-  proposalsChange: number;
-  contractsChange: number;
-  invoicesChange: number;
+  revenueThisMonth: number;
   revenueChange: number;
+  outstanding: number;
+  overdueCount: number;
+  overdueAmount: number;
+  totalInvoices: number;
+  invoicesChange: number;
+  gstLiability: { total: number; cgst: number; sgst: number; igst: number };
+}
+
+export interface AgingData {
+  buckets: {
+    current: any[];
+    '0_30': any[];
+    '30_60': any[];
+    '60_90': any[];
+    '90_plus': any[];
+  };
+  totals: Record<string, number>;
+  totalOutstanding: number;
+}
+
+export interface CashFlowData {
+  projection: { next30: number; next60: number; next90: number; beyond: number; total: number };
+  monthlyRevenue: Array<{ month: string; year: number; revenue: number }>;
+}
+
+export interface TopClientsData {
+  clients: Array<{ id: number; name: string; totalRevenue: number; invoiceCount: number }>;
 }
 
 export interface RevenueData {
@@ -26,159 +65,100 @@ export interface StatusData {
   color: string;
 }
 
+// ─── Combined Hook ────────────────────────────────────────
 export const useDashboardStats = () => {
   const { user } = useAuth();
 
-  const statsQuery = useQuery({
-    queryKey: ['dashboard-stats', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      
-      // Get counts for all entities
-      const [
-        clientsResult,
-        proposalsResult,
-        contractsResult,
-        invoicesResult,
-        paymentsResult,
-      ] = await Promise.all([
-        supabase.from('clients').select('id', { count: 'exact', head: true }),
-        supabase.from('proposals').select('id, status', { count: 'exact' }).in('status', ['draft', 'sent']),
-        supabase.from('contracts').select('id', { count: 'exact' }).eq('status', 'active'),
-        supabase.from('invoices').select('id, total, status', { count: 'exact' }).in('status', ['draft', 'sent', 'overdue']),
-        supabase.from('payments').select('amount, payment_date'),
-      ]);
-      
-      // Calculate this month's revenue
-      const now = new Date();
-      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const monthlyPayments = paymentsResult.data?.filter(p => 
-        new Date(p.payment_date) >= firstOfMonth
-      ) || [];
-      const revenueThisMonth = monthlyPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      
-      return {
-        totalClients: clientsResult.count || 0,
-        activeProposals: proposalsResult.count || 0,
-        activeContracts: contractsResult.count || 0,
-        pendingInvoices: invoicesResult.count || 0,
-        revenueThisMonth,
-        // Mock change percentages for now
-        clientsChange: 12,
-        proposalsChange: 8,
-        contractsChange: 5,
-        invoicesChange: -2,
-        revenueChange: 15,
-      } as DashboardStats;
-    },
+  // KPI data from new endpoint
+  const kpiQuery = useQuery({
+    queryKey: ['dashboard-kpi', user?.id],
+    queryFn: () => dashboardFetch<DashboardKPI>('/dashboard/kpi'),
     enabled: !!user,
+    staleTime: 30000,
   });
 
-  const revenueChartQuery = useQuery({
-    queryKey: ['revenue-chart', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('amount, payment_date')
-        .order('payment_date', { ascending: true });
-      
-      // Group by month
-      const monthlyRevenue: { [key: string]: number } = {};
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      
-      // Initialize all months to 0
-      months.forEach(month => {
-        monthlyRevenue[month] = 0;
-      });
-      
-      payments?.forEach(payment => {
-        const date = new Date(payment.payment_date);
-        const month = months[date.getMonth()];
-        monthlyRevenue[month] += Number(payment.amount);
-      });
-      
-      return months.map(month => ({
-        month,
-        revenue: monthlyRevenue[month],
-      })) as RevenueData[];
-    },
+  // Aging analysis
+  const agingQuery = useQuery({
+    queryKey: ['dashboard-aging', user?.id],
+    queryFn: () => dashboardFetch<AgingData>('/dashboard/aging'),
     enabled: !!user,
+    staleTime: 60000,
   });
 
+  // Cash flow
+  const cashFlowQuery = useQuery({
+    queryKey: ['dashboard-cashflow', user?.id],
+    queryFn: () => dashboardFetch<CashFlowData>('/dashboard/cashflow'),
+    enabled: !!user,
+    staleTime: 60000,
+  });
+
+  // Top clients
+  const topClientsQuery = useQuery({
+    queryKey: ['dashboard-top-clients', user?.id],
+    queryFn: () => dashboardFetch<TopClientsData>('/dashboard/top-clients'),
+    enabled: !!user,
+    staleTime: 60000,
+  });
+
+  // Invoice status distribution (from existing invoices API)
   const invoiceStatusQuery = useQuery({
     queryKey: ['invoice-status-chart', user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<StatusData[]> => {
       if (!user) return [];
-      
-      const { data: invoices } = await supabase
-        .from('invoices')
-        .select('status');
-      
-      const statusCounts = {
-        'Pending': 0,
-        'Paid': 0,
-        'Overdue': 0,
-      };
-      
-      invoices?.forEach(invoice => {
-        if (invoice.status === 'paid') {
-          statusCounts['Paid']++;
-        } else if (invoice.status === 'overdue') {
-          statusCounts['Overdue']++;
-        } else {
-          statusCounts['Pending']++;
-        }
-      });
-      
-      return [
-        { name: 'Pending', value: statusCounts['Pending'], color: '#3B82F6' },
-        { name: 'Paid', value: statusCounts['Paid'], color: '#10B981' },
-        { name: 'Overdue', value: statusCounts['Overdue'], color: '#EF4444' },
-      ] as StatusData[];
+      try {
+        const data = await dashboardFetch<{ invoices: any[]; total: number }>('/invoices?limit=1000');
+        const statusCounts = { Draft: 0, Sent: 0, Paid: 0, Overdue: 0, Cancelled: 0 };
+        (data.invoices || []).forEach((inv: any) => {
+          if (inv.status === 'paid') statusCounts.Paid++;
+          else if (inv.status === 'overdue') statusCounts.Overdue++;
+          else if (inv.status === 'draft') statusCounts.Draft++;
+          else if (inv.status === 'cancelled') statusCounts.Cancelled++;
+          else statusCounts.Sent++;
+        });
+        return [
+          { name: 'Draft', value: statusCounts.Draft, color: '#94a3b8' },
+          { name: 'Sent', value: statusCounts.Sent, color: '#3b82f6' },
+          { name: 'Paid', value: statusCounts.Paid, color: '#10b981' },
+          { name: 'Overdue', value: statusCounts.Overdue, color: '#ef4444' },
+          { name: 'Cancelled', value: statusCounts.Cancelled, color: '#6b7280' },
+        ].filter(s => s.value > 0);
+      } catch {
+        return [];
+      }
     },
     enabled: !!user,
   });
 
-  const proposalStatusQuery = useQuery({
-    queryKey: ['proposal-status-chart', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      
-      const { data: proposals } = await supabase
-        .from('proposals')
-        .select('status');
-      
-      const statusCounts = {
-        'Draft': 0,
-        'Sent': 0,
-        'Accepted': 0,
-        'Rejected': 0,
-      };
-      
-      proposals?.forEach(proposal => {
-        if (proposal.status === 'draft') statusCounts['Draft']++;
-        else if (proposal.status === 'sent') statusCounts['Sent']++;
-        else if (proposal.status === 'accepted') statusCounts['Accepted']++;
-        else if (proposal.status === 'rejected') statusCounts['Rejected']++;
-      });
-      
-      return [
-        { name: 'Draft', value: statusCounts['Draft'], color: '#94A3B8' },
-        { name: 'Sent', value: statusCounts['Sent'], color: '#3B82F6' },
-        { name: 'Accepted', value: statusCounts['Accepted'], color: '#10B981' },
-        { name: 'Rejected', value: statusCounts['Rejected'], color: '#EF4444' },
-      ] as StatusData[];
-    },
-    enabled: !!user,
-  });
+  // Backward compatibility: construct old stats shape from KPI data
+  const kpi = kpiQuery.data;
+  const stats = kpi ? {
+    totalClients: kpi.totalClients,
+    activeProposals: 0,
+    activeContracts: 0,
+    pendingInvoices: kpi.overdueCount,
+    revenueThisMonth: kpi.revenueThisMonth,
+    clientsChange: kpi.clientsChange,
+    proposalsChange: 0,
+    contractsChange: 0,
+    invoicesChange: kpi.invoicesChange,
+    revenueChange: kpi.revenueChange,
+    mrr: 0,
+    churnRate: 0,
+    cashFlowProjection: cashFlowQuery.data?.projection?.total || 0,
+  } : null;
 
   return {
-    stats: statsQuery.data,
-    revenueData: revenueChartQuery.data || [],
+    // Legacy
+    stats,
+    revenueData: (cashFlowQuery.data?.monthlyRevenue || []).map(m => ({ month: m.month, revenue: m.revenue })),
     invoiceStatusData: invoiceStatusQuery.data || [],
-    proposalStatusData: proposalStatusQuery.data || [],
-    isLoading: statsQuery.isLoading || revenueChartQuery.isLoading,
+    proposalStatusData: [],
+    isLoading: kpiQuery.isLoading,
+    // New
+    kpi: kpiQuery.data,
+    aging: agingQuery.data,
+    cashFlow: cashFlowQuery.data,
+    topClients: topClientsQuery.data?.clients || [],
   };
 };

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { paymentsApi } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -32,13 +32,18 @@ export const usePayments = () => {
     queryKey: ['payments', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from('payments')
-        .select('*')
-        .order('payment_date', { ascending: false });
-      
-      if (error) throw error;
-      return data as Payment[];
+      const response = await paymentsApi.list();
+      return (response.payments || []).map((p: any) => ({
+        id: String(p.id),
+        user_id: '',
+        invoice_id: String(p.invoiceId || p.transactionId || ''),
+        amount: p.amount || 0,
+        payment_date: p.paymentDate,
+        payment_method: p.paymentMethod || 'other',
+        reference: p.notes || null,
+        notes: p.notes || null,
+        created_at: p.createdAt,
+      })) as Payment[];
     },
     enabled: !!user,
   });
@@ -46,47 +51,13 @@ export const usePayments = () => {
   const recordPayment = useMutation({
     mutationFn: async (paymentData: PaymentFormData) => {
       if (!user) throw new Error('User not authenticated');
-      
-      // Create payment
-      const { data: payment, error: paymentError } = await supabase
-        .from('payments')
-        .insert({
-          user_id: user.id,
-          invoice_id: paymentData.invoiceId,
-          amount: paymentData.amount,
-          payment_date: paymentData.paymentDate,
-          payment_method: paymentData.paymentMethod,
-          reference: paymentData.reference || null,
-          notes: paymentData.notes || null,
-        })
-        .select()
-        .single();
-      
-      if (paymentError) throw paymentError;
-      
-      // Get invoice total and sum of payments
-      const { data: invoice } = await supabase
-        .from('invoices')
-        .select('total')
-        .eq('id', paymentData.invoiceId)
-        .single();
-      
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('amount')
-        .eq('invoice_id', paymentData.invoiceId);
-      
-      const totalPaid = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
-      
-      // Update invoice status if fully paid
-      if (invoice && totalPaid >= Number(invoice.total)) {
-        await supabase
-          .from('invoices')
-          .update({ status: 'paid' as const })
-          .eq('id', paymentData.invoiceId);
-      }
-      
-      return payment;
+      return paymentsApi.record({
+        invoiceId: Number(paymentData.invoiceId),
+        amount: paymentData.amount,
+        paymentMethod: paymentData.paymentMethod,
+        paymentDate: paymentData.paymentDate,
+        notes: paymentData.notes || undefined,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
@@ -98,10 +69,25 @@ export const usePayments = () => {
     },
   });
 
+  const deletePayment = useMutation({
+    mutationFn: async (paymentId: string) => {
+      await paymentsApi.delete(Number(paymentId));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      toast.success('Payment deleted successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete payment: ${error.message}`);
+    },
+  });
+
   return {
     payments: paymentsQuery.data || [],
     isLoading: paymentsQuery.isLoading,
     error: paymentsQuery.error,
     recordPayment,
+    deletePayment,
   };
 };

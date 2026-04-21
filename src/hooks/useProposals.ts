@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { proposalsApi } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -39,13 +39,22 @@ export const useProposals = () => {
     queryKey: ['proposals', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from('proposals')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Proposal[];
+      const response = await proposalsApi.list();
+      return (response.proposals || []).map((p: any) => ({
+        id: String(p.id),
+        user_id: String(p.userId || ''),
+        client_id: String(p.clientId || ''),
+        title: p.title,
+        description: p.notes || null,
+        service_type: null,
+        amount: p.total || 0,
+        tax_rate: 0,
+        valid_until: p.validUntil || null,
+        status: p.status,
+        sent_at: null,
+        created_at: p.createdAt,
+        updated_at: p.updatedAt,
+      })) as Proposal[];
     },
     enabled: !!user,
   });
@@ -53,24 +62,14 @@ export const useProposals = () => {
   const createProposal = useMutation({
     mutationFn: async (proposalData: ProposalFormData) => {
       if (!user) throw new Error('User not authenticated');
-      const { data, error } = await supabase
-        .from('proposals')
-        .insert({
-          user_id: user.id,
-          client_id: proposalData.clientId,
-          title: proposalData.title,
-          description: proposalData.description || null,
-          service_type: proposalData.serviceType || null,
-          amount: parseFloat(proposalData.amount) || 0,
-          tax_rate: parseFloat(proposalData.taxRate) || 0,
-          valid_until: proposalData.validUntil || null,
-          status: proposalData.status || 'draft',
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      return proposalsApi.create({
+        clientId: Number(proposalData.clientId),
+        title: proposalData.title,
+        notes: proposalData.description || undefined,
+        total: parseFloat(proposalData.amount) || 0,
+        validUntil: proposalData.validUntil || undefined,
+        status: proposalData.status || 'draft',
+      } as any);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
@@ -84,24 +83,13 @@ export const useProposals = () => {
   const updateProposal = useMutation({
     mutationFn: async (proposalData: ProposalFormData) => {
       if (!proposalData.id) throw new Error('Proposal ID is required');
-      const { data, error } = await supabase
-        .from('proposals')
-        .update({
-          client_id: proposalData.clientId,
-          title: proposalData.title,
-          description: proposalData.description || null,
-          service_type: proposalData.serviceType || null,
-          amount: parseFloat(proposalData.amount) || 0,
-          tax_rate: parseFloat(proposalData.taxRate) || 0,
-          valid_until: proposalData.validUntil || null,
-          status: proposalData.status,
-        })
-        .eq('id', proposalData.id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      return proposalsApi.update(Number(proposalData.id), {
+        title: proposalData.title,
+        notes: proposalData.description || undefined,
+        total: parseFloat(proposalData.amount) || 0,
+        validUntil: proposalData.validUntil || undefined,
+        status: proposalData.status,
+      } as any);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
@@ -114,12 +102,7 @@ export const useProposals = () => {
 
   const deleteProposal = useMutation({
     mutationFn: async (proposalId: string) => {
-      const { error } = await supabase
-        .from('proposals')
-        .delete()
-        .eq('id', proposalId);
-      
-      if (error) throw error;
+      await proposalsApi.delete(Number(proposalId));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
@@ -132,18 +115,7 @@ export const useProposals = () => {
 
   const sendProposal = useMutation({
     mutationFn: async (proposalId: string) => {
-      const { data, error } = await supabase
-        .from('proposals')
-        .update({
-          status: 'sent' as const,
-          sent_at: new Date().toISOString(),
-        })
-        .eq('id', proposalId)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      return proposalsApi.updateStatus(Number(proposalId), 'sent');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });

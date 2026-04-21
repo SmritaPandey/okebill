@@ -1,14 +1,15 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# OneInvoicer Robots.txt
 
 User-agent: *
 Allow: /
+Disallow: /login
+Disallow: /register
+Disallow: /onboarding
+Disallow: /dashboard
+Disallow: /clients
+Disallow: /proposals
+Disallow: /contracts
+Disallow: /invoices
+Disallow: /payments
+Disallow: /analytics
+Disallow: /settings

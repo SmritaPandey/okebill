@@ -5,15 +5,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Invoice } from '@/hooks/useInvoices';
 import { Client } from '@/hooks/useClients';
+import { Printer } from 'lucide-react';
 
 interface InvoiceViewModalProps {
   isOpen: boolean;
   onClose: () => void;
   invoice: Invoice;
   client?: Client;
+  onPrint?: () => void;
 }
 
 const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
@@ -21,13 +24,22 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
   onClose,
   invoice,
   client,
+  onPrint,
 }) => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'paid':
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Paid</Badge>;
       case 'sent':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Sent</Badge>;
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Sent</Badge>;
       case 'overdue':
         return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Overdue</Badge>;
       case 'draft':
@@ -45,27 +57,35 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Invoice {invoice.invoice_number}</span>
-            {getStatusBadge(invoice.status)}
+            <div className="flex items-center gap-2">
+              {getStatusBadge(invoice.status)}
+              {onPrint && (
+                <Button variant="outline" size="sm" onClick={onPrint} className="gap-2">
+                  <Printer className="h-4 w-4" />
+                  Print
+                </Button>
+              )}
+            </div>
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Bill To</h3>
               <p className="text-base font-medium">{client?.name || 'Unknown Client'}</p>
-              {client?.email && <p className="text-sm text-muted-foreground">{client.email}</p>}
+              {client?.contactEmail && <p className="text-sm text-muted-foreground">{client.contactEmail}</p>}
               {client?.address && <p className="text-sm text-muted-foreground">{client.address}</p>}
             </div>
             <div className="text-right">
               <div className="space-y-1">
                 <div>
                   <span className="text-sm text-muted-foreground">Issue Date: </span>
-                  <span className="text-sm">{new Date(invoice.issue_date).toLocaleDateString()}</span>
+                  <span className="text-sm">{new Date(invoice.issue_date).toLocaleDateString('en-IN')}</span>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Due Date: </span>
-                  <span className="text-sm">{new Date(invoice.due_date).toLocaleDateString()}</span>
+                  <span className="text-sm">{new Date(invoice.due_date).toLocaleDateString('en-IN')}</span>
                 </div>
               </div>
             </div>
@@ -82,7 +102,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
               <tbody>
                 <tr className="border-t">
                   <td className="p-3">Services Rendered</td>
-                  <td className="p-3 text-right">${Number(invoice.subtotal).toFixed(2)}</td>
+                  <td className="p-3 text-right">{formatCurrency(Number(invoice.subtotal))}</td>
                 </tr>
               </tbody>
             </table>
@@ -92,15 +112,15 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
             <div className="w-64 space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal:</span>
-                <span>${Number(invoice.subtotal).toFixed(2)}</span>
+                <span>{formatCurrency(Number(invoice.subtotal))}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>Tax:</span>
-                <span>${Number(invoice.tax_amount).toFixed(2)}</span>
+                <span>Tax (GST):</span>
+                <span>{formatCurrency(Number(invoice.tax_amount))}</span>
               </div>
               <div className="flex justify-between font-semibold text-lg border-t pt-2">
                 <span>Total:</span>
-                <span>${Number(invoice.total).toFixed(2)}</span>
+                <span>{formatCurrency(Number(invoice.total))}</span>
               </div>
             </div>
           </div>

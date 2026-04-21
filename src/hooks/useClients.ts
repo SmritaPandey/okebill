@@ -1,19 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { clientsApi, type Client } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-export interface Client {
-  id: string;
-  user_id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  address: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
+export type { Client };
 
 export interface ClientFormData {
   id?: string;
@@ -21,6 +11,7 @@ export interface ClientFormData {
   email: string;
   phone: string;
   address: string;
+  gstin: string;
   notes: string;
 }
 
@@ -32,13 +23,8 @@ export const useClients = () => {
     queryKey: ['clients', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Client[];
+      const response = await clientsApi.list();
+      return response.clients || [];
     },
     enabled: !!user,
   });
@@ -46,21 +32,15 @@ export const useClients = () => {
   const createClient = useMutation({
     mutationFn: async (clientData: ClientFormData) => {
       if (!user) throw new Error('User not authenticated');
-      const { data, error } = await supabase
-        .from('clients')
-        .insert({
-          user_id: user.id,
-          name: clientData.name,
-          email: clientData.email,
-          phone: clientData.phone || null,
-          address: clientData.address || null,
-          notes: clientData.notes || null,
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      const stateCode = clientData.gstin?.length >= 2 ? clientData.gstin.substring(0, 2) : undefined;
+      return clientsApi.create({
+        name: clientData.name,
+        contactEmail: clientData.email,
+        phone: clientData.phone || undefined,
+        address: clientData.address || undefined,
+        gstin: clientData.gstin || undefined,
+        stateCode,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
@@ -74,21 +54,15 @@ export const useClients = () => {
   const updateClient = useMutation({
     mutationFn: async (clientData: ClientFormData) => {
       if (!clientData.id) throw new Error('Client ID is required');
-      const { data, error } = await supabase
-        .from('clients')
-        .update({
-          name: clientData.name,
-          email: clientData.email,
-          phone: clientData.phone || null,
-          address: clientData.address || null,
-          notes: clientData.notes || null,
-        })
-        .eq('id', clientData.id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      const stateCode = clientData.gstin?.length >= 2 ? clientData.gstin.substring(0, 2) : undefined;
+      return clientsApi.update(Number(clientData.id), {
+        name: clientData.name,
+        contactEmail: clientData.email,
+        phone: clientData.phone || undefined,
+        address: clientData.address || undefined,
+        gstin: clientData.gstin || undefined,
+        stateCode,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
@@ -101,12 +75,7 @@ export const useClients = () => {
 
   const deleteClient = useMutation({
     mutationFn: async (clientId: string) => {
-      const { error } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', clientId);
-      
-      if (error) throw error;
+      return clientsApi.delete(Number(clientId));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });

@@ -2,8 +2,9 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, Send, FileCheck, X, File } from 'lucide-react';
+import { Pencil, Trash2, Send, FileCheck, Link2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +37,7 @@ const ProposalList: React.FC<ProposalListProps> = ({
   isLoading = false,
 }) => {
   const getClientName = (clientId: string) => {
-    const client = clients.find((c) => c.id === clientId);
+    const client = clients.find((c) => String(c.id) === String(clientId));
     return client ? client.name : 'Unknown Client';
   };
 
@@ -45,7 +46,7 @@ const ProposalList: React.FC<ProposalListProps> = ({
       case 'draft':
         return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Draft</Badge>;
       case 'sent':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Sent</Badge>;
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Sent</Badge>;
       case 'accepted':
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Accepted</Badge>;
       case 'rejected':
@@ -122,21 +123,32 @@ const ProposalList: React.FC<ProposalListProps> = ({
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
-                    
+
                     {proposal.status === 'draft' && (
                       <DropdownMenuItem onClick={() => onSend(proposal.id!)}>
                         <Send className="mr-2 h-4 w-4" />
                         Send to Client
                       </DropdownMenuItem>
                     )}
-                    
+
+                    {(proposal.status === 'sent' || proposal.status === 'accepted') && (
+                      <DropdownMenuItem onClick={() => {
+                        const publicUrl = `${window.location.origin}/p/${proposal.id}`;
+                        navigator.clipboard.writeText(publicUrl);
+                        toast.success('Link copied to clipboard!');
+                      }}>
+                        <Link2 className="mr-2 h-4 w-4" />
+                        Copy Shareable Link
+                      </DropdownMenuItem>
+                    )}
+
                     {proposal.status === 'accepted' && (
                       <DropdownMenuItem onClick={() => onConvertToContract(proposal.id!)}>
                         <FileCheck className="mr-2 h-4 w-4" />
                         Convert to Contract
                       </DropdownMenuItem>
                     )}
-                    
+
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => onDelete(proposal.id!)}

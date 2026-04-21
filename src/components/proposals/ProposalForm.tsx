@@ -70,15 +70,15 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Simple validation
     if (!formData.title || !formData.clientId) {
       toast.error('Title and Client are required fields');
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       onSubmit(formData);
@@ -201,7 +201,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => 
+                onValueChange={(value) =>
                   handleSelectChange('status', value as 'draft' | 'sent' | 'accepted' | 'rejected')
                 }
               >
@@ -219,17 +219,17 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={onCancel}
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-brand-blue hover:bg-brand-blue-dark"
+            className="bg-brand-navy hover:bg-brand-navy-dark"
           >
             {isSubmitting ? 'Saving...' : initialData ? 'Update Proposal' : 'Create Proposal'}
           </Button>
