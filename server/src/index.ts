@@ -114,7 +114,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 // ─── Start (skip when imported by tests) ────────────────────
 if (!process.env.VITEST) {
     app.listen(PORT, () => {
-        console.log(`🚀 OkBill API running on http://localhost:${PORT}`);
+        console.log(`🚀 OkeBill API running on http://localhost:${PORT}`);
         console.log(`📋 Health check: http://localhost:${PORT}/health`);
     });
 }

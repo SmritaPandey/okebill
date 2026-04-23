@@ -40,9 +40,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
       <div className="flex h-screen items-center justify-center mesh-gradient">
         <div className="flex flex-col items-center gap-4">
-          <img src="/logo.png" alt="OkBill" className="h-10 w-10" />
+          <img src="/logo.png" alt="OkeBill" className="h-10 w-10" />
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
-          <span className="text-sm text-gray-500 font-medium">Loading OkBill...</span>
+          <span className="text-sm text-gray-500 font-medium">Loading OkeBill...</span>
         </div>
       </div>
     );

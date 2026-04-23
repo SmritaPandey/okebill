@@ -121,7 +121,7 @@ router.post('/checkout', authMiddleware, async (req: AuthRequest, res) => {
             customerLastName: user.lastName,
             customerEmail: user.email,
             customerMobile: user.phone || '9999999999',
-            productDescription: `OkBill ${plan.name} Plan - Monthly Subscription`,
+            productDescription: `OkeBill ${plan.name} Plan - Monthly Subscription`,
             userDefined1: `plan:${planId},userId:${userId}`,
         });
 

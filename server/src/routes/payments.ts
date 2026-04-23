@@ -298,7 +298,7 @@ router.post('/gateway/payment-link', async (req: AuthRequest, res) => {
             clientName: invoice.client.name,
             clientEmail: invoice.client.contactEmail,
             clientPhone: invoice.client.phone || undefined,
-            description: `Payment for Invoice ${invoice.invoiceNumber} from ${user?.companyName || 'OkBill'}`,
+            description: `Payment for Invoice ${invoice.invoiceNumber} from ${user?.companyName || 'OkeBill'}`,
             expireDays: expireDays || 30,
         });
 

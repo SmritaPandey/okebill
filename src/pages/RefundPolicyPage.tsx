@@ -34,9 +34,9 @@ const RefundPolicyPage: React.FC = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <img src="/logo.png" alt="OkBill" className="w-8 h-8" />
+              <img src="/logo.png" alt="OkeBill" className="w-8 h-8" />
               <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-                OkBill
+                Ok<span className="text-emerald-500 bg-clip-padding">e</span>Bill
               </span>
             </div>
           </div>
@@ -348,7 +348,7 @@ const RefundPolicyPage: React.FC = () => {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-100 py-8 relative z-10">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-slate-400 text-sm">© 2026 OkBill. All rights reserved.</p>
+          <p className="text-slate-400 text-sm">© 2026 OkeBill. All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-3 text-sm text-slate-500">
             <span className="hover:text-emerald-600 cursor-pointer" onClick={() => navigate('/')}>Home</span>
             <span className="hover:text-emerald-600 cursor-pointer" onClick={() => navigate('/refund-policy')}>Refund Policy</span>

@@ -112,7 +112,7 @@ router.post('/send', async (req: AuthRequest, res) => {
                     const params = new URLSearchParams({
                         apikey: tlApiKey,
                         numbers: `91${cleaned}`,
-                        message: `Your OkBill verification code is ${otpCode}. Valid for ${OTP_EXPIRY_MINUTES} minutes. Do not share.`,
+                        message: `Your OkeBill verification code is ${otpCode}. Valid for ${OTP_EXPIRY_MINUTES} minutes. Do not share.`,
                         sender: tlSender,
                     });
                     await fetch('https://api.textlocal.in/send/?' + params.toString());

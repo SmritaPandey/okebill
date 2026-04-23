@@ -212,7 +212,7 @@ async function getBillingContext(userId: number) {
 
 // ─── Comprehensive System Prompt ────────────────────────────
 function buildSystemPrompt(context: any, userName: string) {
-    return `You are the AI Billing Assistant for **OkBill**, a comprehensive GST-compliant billing and invoicing platform built for Indian businesses. You serve as a smart, proactive financial advisor for ${userName}.
+    return `You are the AI Billing Assistant for **OkeBill**, a comprehensive GST-compliant billing and invoicing platform built for Indian businesses. You serve as a smart, proactive financial advisor for ${userName}.
 
 ═══════════════════════════════════════════
   REAL-TIME BILLING DATA (LIVE FROM DATABASE)
@@ -380,7 +380,7 @@ router.post('/chat', async (req: AuthRequest, res) => {
 
                 const chatHistory = [
                     { role: 'user' as const, parts: [{ text: systemPrompt + '\n\nAcknowledge you understand and are ready.' }] },
-                    { role: 'model' as const, parts: [{ text: `Understood! I'm your OkBill billing assistant for ${user.firstName}. I have full real-time access to your billing data. How can I help you today?` }] },
+                    { role: 'model' as const, parts: [{ text: `Understood! I'm your OkeBill billing assistant for ${user.firstName}. I have full real-time access to your billing data. How can I help you today?` }] },
                     ...conversationHistory.map((msg: any) => ({
                         role: msg.role === 'assistant' ? 'model' as const : 'user' as const,
                         parts: [{ text: msg.content }],
@@ -435,7 +435,7 @@ function generateFallbackResponse(message: string, context: any): string {
 
     // ── Greetings ─────────────────────────────────────────
     if (/^(hi|hello|hey|good morning|good afternoon|good evening|howdy|sup|what's up)\b/.test(lower)) {
-        let greeting = `👋 Hello! I'm your OkBill billing assistant. Here's a quick snapshot of your billing:\n\n`;
+        let greeting = `👋 Hello! I'm your OkeBill billing assistant. Here's a quick snapshot of your billing:\n\n`;
         greeting += `📊 **Quick Overview:**\n`;
         greeting += `• Revenue this month: **$${context.summary.revenueThisMonth}**\n`;
         greeting += `• Outstanding: **$${context.summary.totalOutstanding}**\n`;

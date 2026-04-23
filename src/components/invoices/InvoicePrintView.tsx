@@ -773,7 +773,7 @@ const InvoicePrintView: React.FC<InvoicePrintViewProps> = ({
                 </div>
                 {company?.signature_url && (
                   <div style={{ fontSize: '7px', color: '#aaa', marginTop: '3px', lineHeight: 1.3 }}>
-                    Digitally signed on {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} via OkBill
+                    Digitally signed on {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} via OkeBill
                     <br />IT Act 2000, Section 5
                   </div>
                 )}

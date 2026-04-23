@@ -10,12 +10,12 @@ import {
 } from 'lucide-react';
 
 const faqs = [
-  { q: 'How do I generate a GST-compliant invoice?', a: 'Go to Dashboard → Invoices → Create Invoice. Fill in client details, add items with HSN/SAC codes, and OkBill automatically calculates CGST/SGST or IGST based on the place of supply.' },
-  { q: 'What is e-invoicing and do I need it?', a: 'E-invoicing is mandatory for businesses with turnover above ₹5 crore. OkBill integrates with the NIC/IRP portal to generate IRN and QR codes automatically on eligible invoices.' },
+  { q: 'How do I generate a GST-compliant invoice?', a: 'Go to Dashboard → Invoices → Create Invoice. Fill in client details, add items with HSN/SAC codes, and OkeBill automatically calculates CGST/SGST or IGST based on the place of supply.' },
+  { q: 'What is e-invoicing and do I need it?', a: 'E-invoicing is mandatory for businesses with turnover above ₹5 crore. OkeBill integrates with the NIC/IRP portal to generate IRN and QR codes automatically on eligible invoices.' },
   { q: 'How do digital signatures work on invoices?', a: 'Go to Settings → Branding → Signature. You can draw, type, or upload your signature. Once saved, it appears on all invoices and printed documents as "Authorized Signatory".' },
   { q: 'Can I export my data?', a: 'Yes! Go to Settings → Account and click "Export My Data". You\'ll receive a JSON file containing all your account data, invoices, clients, and settings — fully portable.' },
   { q: 'How do I delete my account?', a: 'Go to Settings → Account → Danger Zone → Delete Account. You\'ll need to confirm with your email and password. This action is permanent and irreversible.' },
-  { q: 'What payment methods are supported?', a: 'OkBill uses Razorpay and supports UPI, credit/debit cards, net banking, and wallets. Your clients can pay invoices directly through payment links.' },
+  { q: 'What payment methods are supported?', a: 'OkeBill uses Razorpay and supports UPI, credit/debit cards, net banking, and wallets. Your clients can pay invoices directly through payment links.' },
   { q: 'Is my financial data secure?', a: 'Yes. All data is encrypted with AES-256 at rest and TLS 1.3 in transit. Passwords use bcrypt hashing. We never store card numbers — payments are handled entirely by Razorpay.' },
   { q: 'What happens when my trial expires?', a: 'After the 14-day free trial, you can choose a paid plan or continue with limited free features. Your data is never deleted due to trial expiry.' },
 ];
@@ -58,9 +58,9 @@ const ContactSupportPage: React.FC = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <img src="/logo.png" alt="OkBill" className="w-8 h-8" />
+              <img src="/logo.png" alt="OkeBill" className="w-8 h-8" />
               <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-                OkBill
+                Ok<span className="text-emerald-500 bg-clip-padding">e</span>Bill
               </span>
             </div>
           </div>
@@ -185,7 +185,7 @@ const ContactSupportPage: React.FC = () => {
                 </div>
                 <h2 className="text-xl font-bold text-slate-900">Registered Office</h2>
               </div>
-              <p className="text-slate-600">OkBill Technologies Pvt. Ltd.</p>
+              <p className="text-slate-600">OkeBill Technologies Pvt. Ltd.</p>
               <p className="text-slate-500 text-sm">New Delhi, India 110001</p>
               <p className="text-slate-500 text-sm mt-2">CIN: U74110DL2025PTC123456</p>
             </div>

@@ -123,8 +123,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onToggle }) => {
           {/* Header with logo and close button */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
             <a href="/" className="flex items-center gap-2">
-              <img src="/logo.png" alt="OkBill" className="h-8 w-8" />
-              <span className="text-lg font-semibold text-gray-900">OkBill</span>
+              <img src="/logo.png" alt="OkeBill" className="h-8 w-8" />
+              <span className="text-lg font-semibold text-gray-900">Ok<span className="text-emerald-500">e</span>Bill</span>
             </a>
             <Button
               variant="ghost"

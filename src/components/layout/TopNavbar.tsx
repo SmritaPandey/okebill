@@ -55,11 +55,11 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ onMenuToggle }) => {
 
           {/* Logo */}
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-            <img src="/logo.png" alt="OkBill" className="h-9 w-9" />
+            <img src="/logo.png" alt="OkeBill" className="h-9 w-9" />
             {!isMobile && (
               <div className="flex flex-col">
                 <h1 className="text-lg font-bold leading-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                  OkBill
+                  Ok<span className="text-emerald-500">e</span>Bill
                 </h1>
                 <span className="text-[10px] text-gray-400 font-medium -mt-0.5">Simple | Hisab | Accurate</span>
               </div>

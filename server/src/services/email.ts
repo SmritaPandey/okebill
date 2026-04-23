@@ -52,7 +52,7 @@ function baseTemplate(title: string, body: string, companyName: string) {
                 ${body}
             </div>
             <div class="footer">
-                <p>Sent via OkBill — Simple | Hisab | Accurate</p>
+                <p>Sent via OkeBill — Simple | Hisab | Accurate</p>
                 <p>© ${new Date().getFullYear()} ${companyName}</p>
             </div>
         </div>

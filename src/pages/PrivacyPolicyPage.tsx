@@ -41,9 +41,9 @@ const PrivacyPolicyPage: React.FC = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <img src="/logo.png" alt="OkBill" className="w-8 h-8" />
+              <img src="/logo.png" alt="OkeBill" className="w-8 h-8" />
               <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-                OkBill
+                Ok<span className="text-emerald-500 bg-clip-padding">e</span>Bill
               </span>
             </div>
           </div>
@@ -65,7 +65,7 @@ const PrivacyPolicyPage: React.FC = () => {
               Privacy <span className="text-emerald-600">Policy</span>
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              We take your privacy seriously. This policy explains how OkBill collects, uses, and protects your data in compliance with the
+              We take your privacy seriously. This policy explains how OkeBill collects, uses, and protects your data in compliance with the
               <strong> Digital Personal Data Protection Act, 2023 (India)</strong> and international privacy standards.
             </p>
             <p className="text-sm text-slate-400 mt-4">Last updated: March 29, 2026</p>
@@ -291,7 +291,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-slate-900">7. Cookies & Local Storage</h2>
               </div>
               <div className="space-y-4 text-slate-600 leading-relaxed">
-                <p>OkBill uses minimal cookies and browser local storage:</p>
+                <p>OkeBill uses minimal cookies and browser local storage:</p>
                 <div className="overflow-hidden rounded-xl border border-slate-200">
                   <table className="w-full text-sm">
                     <thead>

@@ -252,7 +252,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ value, onChange, onClear, c
       {/* IT Act Disclaimer */}
       <div className="px-4 pb-2">
         <p className="text-[10px] text-slate-400 leading-tight">
-          Electronic signatures via OkBill are recognized under Section 5, Information Technology Act, 2000.
+          Electronic signatures via OkeBill are recognized under Section 5, Information Technology Act, 2000.
           By signing, you confirm this is your authorized signatory mark.
         </p>
       </div>

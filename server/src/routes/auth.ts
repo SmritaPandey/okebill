@@ -412,7 +412,7 @@ router.get('/export-data', authMiddleware, async (req: AuthRequest, res) => {
         res.setHeader('Content-Disposition', `attachment; filename="okbill-data-export-${Date.now()}.json"`);
         res.json({
             exportedAt: new Date().toISOString(),
-            platform: 'OkBill',
+            platform: 'OkeBill',
             dataProtection: 'DPDP Act 2023 / GDPR Data Portability',
             user: safeUser,
         });

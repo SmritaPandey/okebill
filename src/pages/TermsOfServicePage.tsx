@@ -42,9 +42,9 @@ const TermsOfServicePage: React.FC = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <img src="/logo.png" alt="OkBill" className="w-8 h-8" />
+              <img src="/logo.png" alt="OkeBill" className="w-8 h-8" />
               <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-                OkBill
+                Ok<span className="text-emerald-500 bg-clip-padding">e</span>Bill
               </span>
             </div>
           </div>
@@ -66,7 +66,7 @@ const TermsOfServicePage: React.FC = () => {
               Terms of <span className="text-emerald-600">Service</span>
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              By using OkBill, you agree to the following terms and conditions.
+              By using OkeBill, you agree to the following terms and conditions.
               Please read them carefully before registering or using our services.
             </p>
             <p className="text-sm text-slate-400 mt-4">Effective: March 29, 2026 · Version 1.0</p>
@@ -112,7 +112,7 @@ const TermsOfServicePage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-slate-900">1. Acceptance of Terms</h2>
               </div>
               <div className="space-y-3 text-slate-600 leading-relaxed">
-                <p>By creating an account, accessing, or using OkBill (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you are using the Service on behalf of a business, you represent that you have the authority to bind that business to these Terms.</p>
+                <p>By creating an account, accessing, or using OkeBill (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you are using the Service on behalf of a business, you represent that you have the authority to bind that business to these Terms.</p>
                 <p>If you do not agree to these Terms, you must not use the Service.</p>
                 <p>We may update these Terms from time to time. Continued use of the Service after changes constitutes acceptance of the revised Terms. Material changes will be communicated via email or in-app notification at least 30 days before taking effect.</p>
               </div>
@@ -137,7 +137,7 @@ const TermsOfServicePage: React.FC = () => {
                 </ul>
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4">
                   <p className="text-amber-800 text-sm">
-                    <strong>⚠ Important:</strong> OkBill will never ask for your password via email or phone.
+                    <strong>⚠ Important:</strong> OkeBill will never ask for your password via email or phone.
                     If you receive such a request, report it to <a href="mailto:security@okebill.com" className="underline">security@okebill.com</a>.
                   </p>
                 </div>
@@ -153,7 +153,7 @@ const TermsOfServicePage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-slate-900">3. Service Description</h2>
               </div>
               <div className="space-y-3 text-slate-600 leading-relaxed">
-                <p>OkBill provides a cloud-based billing and invoicing platform that includes:</p>
+                <p>OkeBill provides a cloud-based billing and invoicing platform that includes:</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
                   <li>GST-compliant invoice generation (B2B, B2C, export)</li>
                   <li>E-invoicing via NIC/IRP with IRN and QR code generation</li>
@@ -200,9 +200,9 @@ const TermsOfServicePage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-slate-900">5. Digital Signatures & E-Documents</h2>
               </div>
               <div className="space-y-3 text-slate-600 leading-relaxed">
-                <p>OkBill supports electronic signatures on invoices and documents:</p>
+                <p>OkeBill supports electronic signatures on invoices and documents:</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
-                  <li><strong>Legal Validity:</strong> Electronic signatures created through OkBill are recognized under <strong>Section 5 of the Information Technology Act, 2000</strong>, which grants legal validity to electronic records and signatures</li>
+                  <li><strong>Legal Validity:</strong> Electronic signatures created through OkeBill are recognized under <strong>Section 5 of the Information Technology Act, 2000</strong>, which grants legal validity to electronic records and signatures</li>
                   <li><strong>Signature Types:</strong> Drawn (canvas-based), typed (text rendering), or uploaded (image) — all stored securely as your authorized signatory mark</li>
                   <li><strong>Audit Trail:</strong> Each signed document includes a timestamp and the signer's identity for verification</li>
                   <li><strong>Non-Repudiation:</strong> Once applied, signatures serve as your authorized approval and cannot be disputed without proper grounds</li>
@@ -210,7 +210,7 @@ const TermsOfServicePage: React.FC = () => {
                 </ul>
                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mt-4">
                   <p className="text-emerald-800 text-sm">
-                    <strong>📜 Note:</strong> OkBill's electronic signatures are suitable for most business invoices and documents.
+                    <strong>📜 Note:</strong> OkeBill's electronic signatures are suitable for most business invoices and documents.
                     For documents requiring Class 2/3 DSC (e.g., ROC filings, government tenders), use the DSC integration feature.
                   </p>
                 </div>
@@ -251,9 +251,9 @@ const TermsOfServicePage: React.FC = () => {
               </div>
               <div className="space-y-3 text-slate-600 leading-relaxed">
                 <ul className="list-disc list-inside space-y-2 ml-2">
-                  <li><strong>Our IP:</strong> OkBill, its logo, UI design, code, and documentation are owned by OkBill and protected under Indian and international IP laws</li>
+                  <li><strong>Our IP:</strong> OkeBill, its logo, UI design, code, and documentation are owned by OkeBill and protected under Indian and international IP laws</li>
                   <li><strong>Your Data:</strong> You retain all rights to the data you create (invoices, client records, business data). We do not claim any ownership over your content</li>
-                  <li><strong>License:</strong> You grant OkBill a limited license to process your data solely to provide the Service</li>
+                  <li><strong>License:</strong> You grant OkeBill a limited license to process your data solely to provide the Service</li>
                   <li><strong>Feedback:</strong> Any suggestions or feedback you provide may be used to improve the Service without obligation or compensation</li>
                 </ul>
               </div>
@@ -270,7 +270,7 @@ const TermsOfServicePage: React.FC = () => {
               <div className="space-y-3 text-slate-600 leading-relaxed">
                 <p>To the maximum extent permitted by law:</p>
                 <ul className="list-disc list-inside space-y-2 ml-2">
-                  <li>OkBill is not liable for indirect, incidental, consequential, or punitive damages</li>
+                  <li>OkeBill is not liable for indirect, incidental, consequential, or punitive damages</li>
                   <li>Our total liability shall not exceed the amount paid by you in the 12 months preceding the claim</li>
                   <li>We do not guarantee uninterrupted or error-free access to the Service</li>
                   <li>You are solely responsible for the accuracy of invoices, GST data, and tax calculations generated using the Service</li>
@@ -278,7 +278,7 @@ const TermsOfServicePage: React.FC = () => {
                 </ul>
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4">
                   <p className="text-amber-800 text-sm">
-                    <strong>Disclaimer:</strong> While OkBill strives for accuracy in GST calculations and e-invoice generation,
+                    <strong>Disclaimer:</strong> While OkeBill strives for accuracy in GST calculations and e-invoice generation,
                     the accuracy of tax data is your responsibility. Always verify filings with a certified Chartered Accountant.
                   </p>
                 </div>

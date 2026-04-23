@@ -348,7 +348,7 @@ const ProposalPublicView = () => {
 
                 {/* Footer */}
                 <p className="text-center text-gray-400 text-sm mt-8">
-                    Powered by <span className="font-semibold">OkBill</span>
+                    Powered by <span className="font-semibold">OkeBill</span>
                 </p>
             </div>
         </div>

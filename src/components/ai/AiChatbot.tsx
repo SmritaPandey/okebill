@@ -108,7 +108,7 @@ const AiChatbot: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="text-white font-semibold text-sm">AI Billing Assistant</h3>
-                                <p className="text-emerald-100 text-xs">Powered by OkBill</p>
+                                <p className="text-emerald-100 text-xs">Powered by OkeBill</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-1">

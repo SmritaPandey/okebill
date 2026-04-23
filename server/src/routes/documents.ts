@@ -19,7 +19,7 @@ async function getCompanyInfo(userId: number) {
     const branding = (brandingSettings?.settings as any) || {};
     const invoiceConfig = (invoiceSettings?.settings as any) || {};
     return {
-        companyName: user?.companyName || 'OkBill',
+        companyName: user?.companyName || 'OkeBill',
         companyEmail: user?.email,
         companyPhone: user?.phone || undefined,
         companyGstin: user?.gstin || branding.gstin || undefined,

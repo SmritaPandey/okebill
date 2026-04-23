@@ -308,7 +308,7 @@ const OnboardingPage = () => {
       // Mark onboarding as complete
       await fetch(`${API_URL}/settings/onboarding-complete`, { method: 'POST', headers });
       await refreshProfile();
-      toast.success('Setup complete! Welcome to OkBill.');
+      toast.success('Setup complete! Welcome to OkeBill.');
       // Full page reload to ensure AuthCheck reads fresh onboardingComplete state
       window.location.href = '/dashboard';
     } catch (error: any) {
@@ -324,8 +324,8 @@ const OnboardingPage = () => {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="OkBill" className="h-9 w-9" />
-            <span className="text-xl font-semibold text-brand-navy">OkBill</span>
+            <img src="/logo.png" alt="OkeBill" className="h-9 w-9" />
+            <span className="text-xl font-semibold text-brand-navy">Ok<span className="text-emerald-500">e</span>Bill</span>
           </a>
           <div className="flex items-center gap-4 text-sm text-gray-500">
             <a href="#" className="text-brand-navy">Need help?</a>
@@ -338,7 +338,7 @@ const OnboardingPage = () => {
 
       <div className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome to OkBill</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Welcome to Ok<span className="text-emerald-500">e</span>Bill</h1>
           <p className="mt-2 text-lg text-gray-600">Let's get your account set up so you can start billing.</p>
         </div>
 
@@ -596,7 +596,7 @@ const OnboardingPage = () => {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-lg font-medium text-gray-900">Brand Customization</h2>
-                  <p className="text-sm text-gray-500">Customize the appearance of your OkBill platform to match your brand.</p>
+                  <p className="text-sm text-gray-500">Customize the appearance of your OkeBill platform to match your brand.</p>
                 </div>
 
                 <div className="space-y-4">

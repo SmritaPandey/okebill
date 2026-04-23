@@ -136,7 +136,7 @@ const RegisterPage = () => {
 
     toast({
       title: "Account created successfully!",
-      description: "Welcome to OkBill. Let's get you set up."
+      description: "Welcome to OkeBill. Let's get you set up."
     });
 
     // Navigation to onboarding is handled by AuthCheck
@@ -167,8 +167,8 @@ const RegisterPage = () => {
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <a href="/" className="flex flex-col items-center">
-          <img src="/logo.png" alt="OkBill" className="h-16 w-16 mb-4" />
-          <h1 className="text-3xl font-bold text-gradient">OkBill</h1>
+          <img src="/logo.png" alt="OkeBill" className="h-16 w-16 mb-4" />
+          <h1 className="text-3xl font-bold text-gradient">Ok<span className="text-emerald-500">e</span>Bill</h1>
         </a>
         <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
           Create your account

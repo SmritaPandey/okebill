@@ -97,7 +97,7 @@ const LandingPage = () => {
                 <FileText className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold tracking-tight text-zinc-900">
-                OkBill
+                Ok<span className="text-emerald-500">e</span>Bill
               </span>
             </div>
 
@@ -419,7 +419,7 @@ const LandingPage = () => {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                   <FileText className="text-white w-4 h-4" />
                 </div>
-                <span className="text-lg font-bold tracking-tight text-zinc-900">OkBill</span>
+                <span className="text-lg font-bold tracking-tight text-zinc-900">Ok<span className="text-emerald-500">e</span>Bill</span>
               </div>
               <p className="text-zinc-400 text-sm leading-relaxed mb-6">
                 The comprehensive GST-compliant billing and business management platform. Built in India, for the world.
@@ -454,7 +454,7 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="pt-8 border-t border-zinc-100 flex flex-col md:flex-row items-center justify-between gap-4 max-w-5xl mx-auto">
-            <p className="text-zinc-400 text-xs">© 2026 OkBill. All rights reserved.</p>
+            <p className="text-zinc-400 text-xs">© 2026 Ok<span className="text-emerald-400">e</span>Bill. All rights reserved.</p>
             <div className="flex gap-6 text-zinc-400 text-xs">
               <span className="hover:text-zinc-600 cursor-pointer transition-colors" onClick={() => navigate('/refund-policy')}>Refund Policy</span>
               <span className="hover:text-zinc-600 cursor-pointer transition-colors" onClick={() => navigate('/privacy')}>Privacy Policy</span>

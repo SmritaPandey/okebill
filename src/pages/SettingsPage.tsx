@@ -732,7 +732,7 @@ const SettingsPage = () => {
                       const blob = await resp.blob();
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement('a');
-                      a.href = url; a.download = `okbill-data-export-${Date.now()}.json`;
+                      a.href = url; a.download = `okebill-data-export-${Date.now()}.json`;
                       document.body.appendChild(a); a.click(); a.remove();
                       URL.revokeObjectURL(url);
                       toast.success('Data exported successfully');

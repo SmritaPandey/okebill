@@ -120,10 +120,10 @@ const LoginPage = () => {
         <div className="relative z-10 flex flex-col justify-center px-16 text-white">
           <div className="flex items-center gap-3 mb-8">
             <div className="p-2 bg-white/15 rounded-2xl backdrop-blur-sm">
-              <img src="/logo.png" alt="OkBill" className="h-10 w-10" />
+              <img src="/logo.png" alt="OkeBill" className="h-10 w-10" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">OkBill</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Ok<span className="text-emerald-500">e</span>Bill</h1>
               <p className="text-emerald-200 text-sm">Simple | Hisab | Accurate</p>
             </div>
           </div>
@@ -135,7 +135,7 @@ const LoginPage = () => {
           </h2>
 
           <p className="text-emerald-100/80 text-lg leading-relaxed max-w-md">
-            E-Invoice, E-Way Bill, GSTR-1 — all automated. Join thousands of Indian businesses managing their billing with OkBill.
+            E-Invoice, E-Way Bill, GSTR-1 — all automated. Join thousands of Indian businesses managing their billing with OkeBill.
           </p>
 
           <div className="mt-10 flex items-center gap-6">
@@ -165,7 +165,7 @@ const LoginPage = () => {
             <div className="p-3 bg-emerald-50 rounded-2xl mb-3">
               <Receipt size={28} className="text-emerald-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gradient">OkBill</h1>
+            <h1 className="text-2xl font-bold text-gradient">Ok<span className="text-emerald-500">e</span>Bill</h1>
           </div>
 
           <h2 className="text-center text-2xl font-bold tracking-tight text-gray-900">
