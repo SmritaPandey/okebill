@@ -20,7 +20,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isYearly, setIsYearly] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'half-yearly' | 'yearly'>('monthly');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,16 +54,18 @@ const LandingPage = () => {
   const plans = [
     {
       name: 'Starter',
-      monthlyPrice: 2999,
-      yearlyPrice: 2399,
+      monthlyPrice: 499,
+      halfYearlyPrice: 449,
+      yearlyPrice: 399,
       features: ['Up to 10 clients', 'Unlimited invoices', 'Basic analytics', 'E-Way Bill support', 'Help center support'],
       cta: 'Get Started',
       highlighted: false,
     },
     {
       name: 'Professional',
-      monthlyPrice: 7499,
-      yearlyPrice: 5999,
+      monthlyPrice: 999,
+      halfYearlyPrice: 849,
+      yearlyPrice: 749,
       features: ['Unlimited clients', 'Interactive proposals', 'Custom branding', 'E-Way Bill + E-Invoicing', 'CRM integrations', 'Priority support'],
       cta: 'Start 14-day Trial',
       highlighted: true,
@@ -71,12 +73,34 @@ const LandingPage = () => {
     {
       name: 'Enterprise',
       monthlyPrice: 0,
+      halfYearlyPrice: 0,
       yearlyPrice: 0,
       features: ['Direct API access', 'SLA guarantees', 'Dedicated success manager', 'Custom security features', 'Multi-branch support'],
       cta: 'Talk to Sales',
       highlighted: false,
     },
   ];
+
+  const getDisplayPrice = (plan: typeof plans[0]) => {
+    if (billingCycle === 'yearly') return plan.yearlyPrice;
+    if (billingCycle === 'half-yearly') return plan.halfYearlyPrice;
+    return plan.monthlyPrice;
+  };
+
+  const getSavingsLabel = (plan: typeof plans[0]) => {
+    if (plan.monthlyPrice === 0) return null;
+    if (billingCycle === 'half-yearly') {
+      const total = plan.halfYearlyPrice * 6;
+      const saved = (plan.monthlyPrice * 6) - total;
+      return `₹${total.toLocaleString('en-IN')} for 6 months — save ₹${saved.toLocaleString('en-IN')}`;
+    }
+    if (billingCycle === 'yearly') {
+      const total = plan.yearlyPrice * 12;
+      const saved = (plan.monthlyPrice * 12) - total;
+      return `₹${total.toLocaleString('en-IN')}/year — save ₹${saved.toLocaleString('en-IN')}`;
+    }
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-white font-sans text-zinc-900 selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden">
@@ -93,9 +117,7 @@ const LandingPage = () => {
               className="flex items-center gap-2.5 cursor-pointer group"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-200 group-hover:shadow-lg group-hover:shadow-emerald-300 transition-shadow">
-                <FileText className="w-5 h-5 text-white" />
-              </div>
+              <img src="/logo.png" alt="OkeBill" className="w-9 h-9 rounded-xl shadow-md shadow-emerald-200 group-hover:shadow-lg group-hover:shadow-emerald-300 transition-shadow" />
               <span className="text-xl font-bold tracking-tight text-zinc-900">
                 Ok<span className="text-emerald-500">e</span>Bill
               </span>
@@ -323,17 +345,28 @@ const LandingPage = () => {
             {/* Monthly / Yearly Toggle */}
             <div className="inline-flex items-center bg-white border border-zinc-200 rounded-xl p-1 shadow-sm">
               <button
-                onClick={() => setIsYearly(false)}
+                onClick={() => setBillingCycle('monthly')}
                 className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  !isYearly ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
+                  billingCycle === 'monthly' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
                 }`}
               >
                 Monthly
               </button>
               <button
-                onClick={() => setIsYearly(true)}
+                onClick={() => setBillingCycle('half-yearly')}
                 className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                  isYearly ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
+                  billingCycle === 'half-yearly' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
+                }`}
+              >
+                6 Months
+                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                  Save 10%
+                </span>
+              </button>
+              <button
+                onClick={() => setBillingCycle('yearly')}
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                  billingCycle === 'yearly' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
                 }`}
               >
                 Yearly
@@ -368,10 +401,10 @@ const LandingPage = () => {
                   {plan.monthlyPrice > 0 ? (
                     <>
                       <span className={`text-4xl font-bold ${plan.highlighted ? 'text-white' : 'text-zinc-900'}`}>
-                        ₹{(isYearly ? plan.yearlyPrice : plan.monthlyPrice).toLocaleString('en-IN')}
+                        ₹{getDisplayPrice(plan).toLocaleString('en-IN')}
                       </span>
                       <span className={`text-sm ${plan.highlighted ? 'text-zinc-400' : 'text-zinc-400'}`}>/mo</span>
-                      {isYearly && (
+                      {billingCycle !== 'monthly' && (
                         <span className="ml-2 text-xs line-through text-zinc-400">
                           ₹{plan.monthlyPrice.toLocaleString('en-IN')}
                         </span>
@@ -381,9 +414,9 @@ const LandingPage = () => {
                     <span className={`text-4xl font-bold ${plan.highlighted ? 'text-white' : 'text-zinc-900'}`}>Custom</span>
                   )}
                 </div>
-                {isYearly && plan.monthlyPrice > 0 && (
+                {billingCycle !== 'monthly' && plan.monthlyPrice > 0 && getSavingsLabel(plan) && (
                   <div className={`text-xs mb-4 ${plan.highlighted ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                    ₹{(plan.yearlyPrice * 12).toLocaleString('en-IN')}/year — save ₹{((plan.monthlyPrice - plan.yearlyPrice) * 12).toLocaleString('en-IN')}
+                    {getSavingsLabel(plan)}
                   </div>
                 )}
                 <ul className="space-y-3 mb-8 flex-grow">
@@ -416,9 +449,7 @@ const LandingPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16 max-w-5xl mx-auto">
             <div className="col-span-2 lg:col-span-2 pr-8">
               <div className="flex items-center gap-2.5 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                  <FileText className="text-white w-4 h-4" />
-                </div>
+                <img src="/logo.png" alt="OkeBill" className="w-8 h-8 rounded-lg" />
                 <span className="text-lg font-bold tracking-tight text-zinc-900">Ok<span className="text-emerald-500">e</span>Bill</span>
               </div>
               <p className="text-zinc-400 text-sm leading-relaxed mb-6">
