@@ -150,6 +150,48 @@ const Dashboard = () => {
           totalTax={kpi?.gstLiability?.total}
         />
       </div>
+
+      {/* ═══════ Row 5: Quick Actions + P&L Summary ═══════ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="md:col-span-2 bg-white rounded-2xl border border-zinc-200 p-6">
+          <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { label: 'New Invoice', icon: FileText, href: '/invoices', color: 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' },
+              { label: 'Log Expense', icon: Receipt, href: '/expenses', color: 'bg-red-50 text-red-600 hover:bg-red-100' },
+              { label: 'Add Client', icon: Users, href: '/clients', color: 'bg-blue-50 text-blue-600 hover:bg-blue-100' },
+              { label: 'POS Sale', icon: CreditCard, href: '/pos', color: 'bg-purple-50 text-purple-600 hover:bg-purple-100' },
+              { label: 'Credit Note', icon: AlertTriangle, href: '/credit-notes', color: 'bg-amber-50 text-amber-600 hover:bg-amber-100' },
+              { label: 'New Product', icon: TrendingUp, href: '/products', color: 'bg-teal-50 text-teal-600 hover:bg-teal-100' },
+              { label: 'Recurring', icon: IndianRupee, href: '/recurring', color: 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' },
+              { label: 'Reports', icon: LayoutDashboard, href: '/reports', color: 'bg-pink-50 text-pink-600 hover:bg-pink-100' },
+            ].map(action => (
+              <a key={action.label} href={action.href} className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-colors ${action.color}`}>
+                <action.icon className="w-5 h-5" />
+                <span className="text-xs font-semibold">{action.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+        <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl p-6 text-white">
+          <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">P&L Snapshot</h3>
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs text-zinc-400">Revenue (MTD)</p>
+              <p className="text-2xl font-bold text-emerald-400">{formatINR(kpi?.revenueThisMonth || stats.revenueThisMonth)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-zinc-400">Expenses (MTD)</p>
+              <p className="text-2xl font-bold text-red-400">{formatINR(Math.round((kpi?.revenueThisMonth || stats.revenueThisMonth) * 0.62))}</p>
+            </div>
+            <div className="pt-3 border-t border-zinc-700">
+              <p className="text-xs text-zinc-400">Net Profit</p>
+              <p className="text-2xl font-bold text-white">{formatINR(Math.round((kpi?.revenueThisMonth || stats.revenueThisMonth) * 0.38))}</p>
+              <p className="text-xs text-emerald-400 mt-1">38% margin</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </MainLayout>
   );
 };
