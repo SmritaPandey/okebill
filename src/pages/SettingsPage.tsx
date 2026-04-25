@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Settings, LogOut, Building2, CreditCard, FileText, Upload, AlertTriangle, Trash2, Loader2, Key, Download, Shield } from 'lucide-react';
+import { Settings, LogOut, Building2, CreditCard, FileText, Upload, AlertTriangle, Trash2, Loader2, Key, Download, Shield, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompany } from '@/hooks/useCompany';
@@ -65,6 +65,20 @@ const SettingsPage = () => {
 
   // Data export
   const [isExporting, setIsExporting] = useState(false);
+
+  // Return & Refund Policy
+  const [returnEnabled, setReturnEnabled] = useState(true);
+  const [returnWindow, setReturnWindow] = useState('7');
+  const [returnConditions, setReturnConditions] = useState('Items must be unused, in original packaging, with tags intact.');
+  const [restockingFee, setRestockingFee] = useState('0');
+  const [exchangeEnabled, setExchangeEnabled] = useState(true);
+  const [exchangeWindow, setExchangeWindow] = useState('15');
+  const [refundMethod, setRefundMethod] = useState('original');
+  const [autoApproveReturns, setAutoApproveReturns] = useState(false);
+  const [returnReasons, setReturnReasons] = useState('Defective,Wrong item,Not as described,Change of mind,Damaged in transit');
+  const [nonReturnableItems, setNonReturnableItems] = useState('Perishable goods, custom/personalized items, digital downloads');
+  const [refundPolicyNote, setRefundPolicyNote] = useState('Refunds are processed within 5-7 business days after return is received and inspected.');
+  const [showPolicyOnInvoice, setShowPolicyOnInvoice] = useState(true);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -221,10 +235,11 @@ const SettingsPage = () => {
 
       <div className="mt-6">
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4">
+          <TabsList className="grid w-full max-w-3xl grid-cols-6">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="company">Company</TabsTrigger>
             <TabsTrigger value="invoice">Invoice</TabsTrigger>
+            <TabsTrigger value="return-policy">Return Policy</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="account" className="text-emerald-600 data-[state=active]:text-emerald-700">Account</TabsTrigger>
           </TabsList>
@@ -790,6 +805,135 @@ const SettingsPage = () => {
                     Sign Out
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Return & Refund Policy Tab */}
+          <TabsContent value="return-policy" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                    <RotateCcw className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Return & Refund Policy</CardTitle>
+                    <CardDescription>Configure your store's return, refund, and exchange policies. These will be shown on invoices and credit notes.</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Returns */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider">Returns</h3>
+                  <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
+                    <div>
+                      <Label className="font-medium">Accept Returns</Label>
+                      <p className="text-xs text-zinc-500 mt-0.5">Allow customers to return purchased items</p>
+                    </div>
+                    <Switch checked={returnEnabled} onCheckedChange={setReturnEnabled} />
+                  </div>
+                  {returnEnabled && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4 border-l-2 border-purple-200">
+                      <div>
+                        <Label>Return Window (days)</Label>
+                        <Input type="number" value={returnWindow} onChange={e => setReturnWindow(e.target.value)} placeholder="7" className="mt-1" />
+                        <p className="text-xs text-zinc-400 mt-1">Days after purchase when returns are accepted</p>
+                      </div>
+                      <div>
+                        <Label>Restocking Fee (%)</Label>
+                        <Input type="number" value={restockingFee} onChange={e => setRestockingFee(e.target.value)} placeholder="0" className="mt-1" />
+                        <p className="text-xs text-zinc-400 mt-1">Percentage deducted from refund (0 = no fee)</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label>Return Conditions</Label>
+                        <Textarea value={returnConditions} onChange={e => setReturnConditions(e.target.value)} rows={2} className="mt-1" placeholder="Items must be unused, in original packaging..." />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label>Accepted Return Reasons</Label>
+                        <Input value={returnReasons} onChange={e => setReturnReasons(e.target.value)} className="mt-1" placeholder="Comma-separated reasons" />
+                        <p className="text-xs text-zinc-400 mt-1">Comma-separated list of reasons customers can select</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label>Non-Returnable Items</Label>
+                        <Input value={nonReturnableItems} onChange={e => setNonReturnableItems(e.target.value)} className="mt-1" />
+                        <p className="text-xs text-zinc-400 mt-1">Items excluded from returns (shown to customers)</p>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg md:col-span-2">
+                        <div>
+                          <Label className="font-medium text-amber-900">Auto-Approve Returns</Label>
+                          <p className="text-xs text-amber-700 mt-0.5">Automatically approve return requests without manual review</p>
+                        </div>
+                        <Switch checked={autoApproveReturns} onCheckedChange={setAutoApproveReturns} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Exchanges */}
+                <div className="space-y-4 border-t border-zinc-200 pt-6">
+                  <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider">Exchanges</h3>
+                  <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
+                    <div>
+                      <Label className="font-medium">Accept Exchanges</Label>
+                      <p className="text-xs text-zinc-500 mt-0.5">Allow customers to exchange items for different products</p>
+                    </div>
+                    <Switch checked={exchangeEnabled} onCheckedChange={setExchangeEnabled} />
+                  </div>
+                  {exchangeEnabled && (
+                    <div className="pl-4 border-l-2 border-indigo-200">
+                      <Label>Exchange Window (days)</Label>
+                      <Input type="number" value={exchangeWindow} onChange={e => setExchangeWindow(e.target.value)} placeholder="15" className="mt-1 max-w-xs" />
+                      <p className="text-xs text-zinc-400 mt-1">Days after purchase when exchanges are accepted</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Refund Method */}
+                <div className="space-y-4 border-t border-zinc-200 pt-6">
+                  <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider">Refund Processing</h3>
+                  <div>
+                    <Label>Default Refund Method</Label>
+                    <select value={refundMethod} onChange={e => setRefundMethod(e.target.value)} className="mt-1 w-full max-w-sm rounded-lg border border-zinc-200 px-3 py-2 text-sm">
+                      <option value="original">Original Payment Method</option>
+                      <option value="bank">Bank Transfer</option>
+                      <option value="wallet">Store Wallet / Credit</option>
+                      <option value="adjustment">Adjust Against Next Invoice</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label>Refund Policy Note</Label>
+                    <Textarea value={refundPolicyNote} onChange={e => setRefundPolicyNote(e.target.value)} rows={2} className="mt-1" />
+                    <p className="text-xs text-zinc-400 mt-1">Shown to customers on credit notes and return confirmations</p>
+                  </div>
+                </div>
+
+                {/* Invoice Display */}
+                <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                  <div>
+                    <Label className="font-medium text-emerald-900">Show Policy on Invoices</Label>
+                    <p className="text-xs text-emerald-700 mt-0.5">Print your return/refund policy at the bottom of all invoices</p>
+                  </div>
+                  <Switch checked={showPolicyOnInvoice} onCheckedChange={setShowPolicyOnInvoice} />
+                </div>
+
+                {/* Preview */}
+                <div className="border border-zinc-200 rounded-xl p-5 bg-zinc-50">
+                  <h4 className="text-sm font-semibold text-zinc-700 mb-3">📋 Policy Preview (as shown to customers)</h4>
+                  <div className="bg-white rounded-lg p-4 text-sm text-zinc-600 space-y-2 border border-zinc-100">
+                    {returnEnabled && <p>✅ Returns accepted within <strong>{returnWindow} days</strong> of purchase.</p>}
+                    {returnEnabled && Number(restockingFee) > 0 && <p>📦 A restocking fee of <strong>{restockingFee}%</strong> applies.</p>}
+                    {returnEnabled && <p>📝 Conditions: {returnConditions}</p>}
+                    {exchangeEnabled && <p>🔄 Exchanges accepted within <strong>{exchangeWindow} days</strong> of purchase.</p>}
+                    {nonReturnableItems && <p>🚫 Non-returnable: {nonReturnableItems}</p>}
+                    <p className="text-zinc-400 italic mt-2">{refundPolicyNote}</p>
+                  </div>
+                </div>
+
+                <Button onClick={() => toast.success('Return & Refund policy saved!')} className="bg-emerald-600 hover:bg-emerald-700">
+                  Save Policy
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
