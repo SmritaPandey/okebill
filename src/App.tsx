@@ -20,6 +20,7 @@ import ContractsPage from "./pages/ContractsPage";
 import InvoicesPage from "./pages/InvoicesPage";
 import PaymentsPage from "./pages/PaymentsPage";
 import CreditNotesPage from "./pages/CreditNotesPage";
+import ExpensesPage from "./pages/ExpensesPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
 // New multi-utility modules
@@ -155,6 +156,14 @@ const App = () => (
                   element={
                     <AuthCheck requireAuth={true}>
                       <CreditNotesPage />
+                    </AuthCheck>
+                  }
+                />
+                <Route
+                  path="/expenses"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <ExpensesPage />
                     </AuthCheck>
                   }
                 />
