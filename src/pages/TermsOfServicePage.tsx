@@ -217,6 +217,32 @@ const TermsOfServicePage: React.FC = () => {
               </div>
             </div>
 
+            {/* Credit Notes, Returns & Exchanges */}
+            <div id="returns" className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-purple-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900">5A. Credit Notes, Returns & Exchanges</h2>
+              </div>
+              <div className="space-y-3 text-slate-600 leading-relaxed">
+                <p>OkeBill provides tools for managing reverse billing transactions in compliance with GST regulations:</p>
+                <ul className="list-disc list-inside space-y-2 ml-2">
+                  <li><strong>Credit Notes:</strong> Issue GST-compliant credit notes against invoices for refunds, price corrections, or goods returned. Credit notes automatically calculate reverse GST (CGST/SGST/IGST) and can be linked to original invoices</li>
+                  <li><strong>Debit Notes:</strong> Record adjustments for supplier shortages, quality defects, or price increases with proper GST treatment per Section 34 of the CGST Act</li>
+                  <li><strong>Returns Management:</strong> Track product returns with reason codes, approval workflows, and automatic inventory restocking. Approved returns can auto-generate linked credit notes</li>
+                  <li><strong>Exchanges:</strong> Process product exchanges as a single transaction — combining a return and new invoice with automatic price difference calculation</li>
+                  <li><strong>Refund Methods:</strong> Credits can be applied as bank refunds, wallet credits, or adjustments against future invoices</li>
+                  <li><strong>E-Credit Notes:</strong> For businesses with turnover above ₹5 crore, credit notes are reported to the GST portal (IRP/NIC) as per e-invoicing requirements</li>
+                </ul>
+                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mt-4">
+                  <p className="text-purple-800 text-sm">
+                    <strong>⚡ Compliance Note:</strong> All credit notes and debit notes generated through OkeBill follow the format prescribed under Rule 53 of the CGST Rules, 2017, and include mandatory fields like original invoice reference, reason for issuance, and proper tax breakup.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Acceptable Use */}
             <div id="acceptable-use" className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
               <div className="flex items-center gap-3 mb-6">

@@ -115,7 +115,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 <ul className="list-disc list-inside space-y-2 ml-2">
                   <li><strong>Account Information:</strong> Name, email address, phone number, company name, GSTIN, PAN</li>
                   <li><strong>Financial Information:</strong> Bank account details (account number, IFSC, branch), UPI ID</li>
-                  <li><strong>Business Data:</strong> Client details, invoices, products, proposals, contracts, payment records</li>
+                  <li><strong>Business Data:</strong> Client details, invoices, products, proposals, contracts, payment records, credit notes, debit notes, return requests, and exchange transactions</li>
                   <li><strong>Digital Signatures:</strong> Drawn, typed, or uploaded signatures for invoice authentication</li>
                   <li><strong>Communication:</strong> Support requests, feedback, and correspondence</li>
                 </ul>
