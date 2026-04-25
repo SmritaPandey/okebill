@@ -9,14 +9,14 @@ async function main() {
     // ─── Demo User ───────────────────────────────────────────
     const passwordHash = await bcrypt.hash('password123', 10);
     const user = await prisma.user.upsert({
-        where: { email: 'demo@oneinvoicer.com' },
+        where: { email: 'demo@okebill.com' },
         update: {},
         create: {
-            email: 'demo@oneinvoicer.com',
+            email: 'demo@okebill.com',
             passwordHash,
             firstName: 'Demo',
             lastName: 'User',
-            companyName: 'OneInvoicer Demo',
+            companyName: 'OkeBill Demo',
             role: 'admin',
         },
     });
@@ -178,7 +178,7 @@ async function main() {
     await prisma.userSettings.upsert({
         where: { userId_category: { userId: user.id, category: 'general' } },
         update: {},
-        create: { userId: user.id, category: 'general', settings: { companyName: 'OneInvoicer Demo', currency: 'USD', taxRate: 0.08, paymentTerms: 30, invoicePrefix: 'INV', proposalPrefix: 'PROP' } },
+        create: { userId: user.id, category: 'general', settings: { companyName: 'OkeBill Demo', currency: 'INR', taxRate: 0.18, paymentTerms: 30, invoicePrefix: 'INV', proposalPrefix: 'PROP' } },
     });
     await prisma.userSettings.upsert({
         where: { userId_category: { userId: user.id, category: 'branding' } },
@@ -188,7 +188,7 @@ async function main() {
     console.log(`  ✅ Settings configured`);
 
     console.log('\n🎉 Seeding complete!');
-    console.log('   Login: demo@oneinvoicer.com / password123');
+    console.log('   Login: demo@okebill.com / password123');
 }
 
 main()
