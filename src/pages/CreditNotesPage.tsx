@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -287,6 +288,7 @@ const CreditNotesPage: React.FC = () => {
   };
 
   return (
+    <MainLayout>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -333,6 +335,7 @@ const CreditNotesPage: React.FC = () => {
       {tab === 'returns' && renderReturns()}
       {tab === 'exchanges' && renderExchanges()}
     </div>
+    </MainLayout>
   );
 };
 
