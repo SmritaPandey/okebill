@@ -21,6 +21,7 @@ import InvoicesPage from "./pages/InvoicesPage";
 import PaymentsPage from "./pages/PaymentsPage";
 import CreditNotesPage from "./pages/CreditNotesPage";
 import ExpensesPage from "./pages/ExpensesPage";
+import RecurringInvoicesPage from "./pages/RecurringInvoicesPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
 // New multi-utility modules
@@ -164,6 +165,14 @@ const App = () => (
                   element={
                     <AuthCheck requireAuth={true}>
                       <ExpensesPage />
+                    </AuthCheck>
+                  }
+                />
+                <Route
+                  path="/recurring"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <RecurringInvoicesPage />
                     </AuthCheck>
                   }
                 />

@@ -6,7 +6,7 @@ import {
   Receipt, BarChart, FileCheck,
   CreditCard, Settings, X, ChevronLeft, ChevronRight,
   Package, Warehouse, ShoppingCart, TrendingUp,
-  UserCheck, Truck, PieChart, Crown, RotateCcw, Wallet
+  UserCheck, Truck, PieChart, Crown, RotateCcw, Wallet, RefreshCw
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,7 @@ const navSections: NavSection[] = [
       { name: 'Payments', href: '/payments', icon: CreditCard },
       { name: 'Credit Notes', href: '/credit-notes', icon: RotateCcw },
       { name: 'Expenses', href: '/expenses', icon: Wallet },
+      { name: 'Recurring', href: '/recurring', icon: RefreshCw },
     ],
   },
   {
