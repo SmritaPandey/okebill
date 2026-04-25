@@ -19,6 +19,7 @@ import ProposalPublicView from "./pages/ProposalPublicView";
 import ContractsPage from "./pages/ContractsPage";
 import InvoicesPage from "./pages/InvoicesPage";
 import PaymentsPage from "./pages/PaymentsPage";
+import CreditNotesPage from "./pages/CreditNotesPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
 // New multi-utility modules
@@ -146,6 +147,14 @@ const App = () => (
                   element={
                     <AuthCheck requireAuth={true}>
                       <PaymentsPage />
+                    </AuthCheck>
+                  }
+                />
+                <Route
+                  path="/credit-notes"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <CreditNotesPage />
                     </AuthCheck>
                   }
                 />
