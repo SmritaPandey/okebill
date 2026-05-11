@@ -171,10 +171,10 @@ const RegisterPage = () => {
         description="Start your 14-day free trial with OkeBill. India's most powerful GST billing and e-invoicing platform."
       />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <a href="/" className="flex flex-col items-center">
+        <Link to="/" className="flex flex-col items-center cursor-pointer hover:opacity-90 transition-opacity">
           <img src="/logo.png" alt="OkeBill" className="h-16 w-16 mb-4" />
           <h1 className="text-3xl font-bold text-gradient">Ok<span className="text-emerald-500">e</span>Bill</h1>
-        </a>
+        </Link>
         <h2 className="mt-6 text-center text-2xl font-bold tracking-tight text-gray-900">
           Create your account
         </h2>

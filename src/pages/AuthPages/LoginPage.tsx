@@ -123,7 +123,7 @@ const LoginPage = () => {
         </div>
 
         <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-          <div className="flex items-center gap-3 mb-8">
+          <Link to="/" className="flex items-center gap-3 mb-8 cursor-pointer hover:opacity-90 transition-opacity">
             <div className="p-2 bg-white/15 rounded-2xl backdrop-blur-sm">
               <img src="/logo.png" alt="OkeBill" className="h-10 w-10" />
             </div>
@@ -131,7 +131,7 @@ const LoginPage = () => {
               <h1 className="text-3xl font-bold tracking-tight">Ok<span className="text-emerald-500">e</span>Bill</h1>
               <p className="text-emerald-200 text-sm">Simple | Hisab | Accurate</p>
             </div>
-          </div>
+          </Link>
 
           <h2 className="text-4xl font-bold leading-tight mb-4">
             Simple. <br />
@@ -166,12 +166,12 @@ const LoginPage = () => {
       <div className="flex flex-1 flex-col justify-center bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-20">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           {/* Mobile logo */}
-          <div className="flex flex-col items-center lg:hidden mb-8">
+          <Link to="/" className="flex flex-col items-center lg:hidden mb-8 cursor-pointer hover:opacity-90 transition-opacity">
             <div className="p-3 bg-emerald-50 rounded-2xl mb-3">
               <Receipt size={28} className="text-emerald-600" />
             </div>
             <h1 className="text-2xl font-bold text-gradient">Ok<span className="text-emerald-500">e</span>Bill</h1>
-          </div>
+          </Link>
 
           <h2 className="text-center text-2xl font-bold tracking-tight text-gray-900">
             Sign in to your account
