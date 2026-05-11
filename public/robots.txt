@@ -1,4 +1,4 @@
-# OneInvoicer Robots.txt
+# OkeBill Robots.txt
 
 User-agent: *
 Allow: /
@@ -14,4 +14,4 @@ Disallow: /payments
 Disallow: /analytics
 Disallow: /settings
 
-Sitemap: https://okebill.com/sitemap.xml
+Sitemap: https://www.okebill.com/sitemap.xml
