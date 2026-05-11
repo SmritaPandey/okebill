@@ -36,3 +36,15 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
         }
     }
 }
+
+/**
+ * Middleware that requires the authenticated user to have an 'admin' role.
+ * Must be used AFTER authMiddleware.
+ */
+export function requireAdmin(req: AuthRequest, res: Response, next: NextFunction): void {
+    if (req.userRole !== 'admin') {
+        res.status(403).json({ message: 'Admin access required', code: 'FORBIDDEN' });
+        return;
+    }
+    next();
+}

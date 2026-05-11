@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   ArrowLeft, Shield, Eye, Database, Lock, UserCheck, Globe,
-  Server, Clock, Mail, ChevronRight, FileText, Trash2,
+  AlertTriangle, Ban, Gavel, ChevronRight, Mail, Clock, FileText, Trash2,
 } from 'lucide-react';
+import SEO from '@/components/common/SEO';
 
 const sections = [
   { id: 'collection', label: 'Data Collection', icon: Database },
@@ -27,6 +28,10 @@ const PrivacyPolicyPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-emerald-100 selection:text-[#1E3A5F]">
+      <SEO 
+        title="Privacy Policy" 
+        description="Learn how OkeBill collects, uses, and protects your business and personal data in compliance with DPDP Act 2023."
+      />
       {/* Mesh Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-200/20 blur-[120px]" />

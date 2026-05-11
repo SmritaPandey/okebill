@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Mail, Lock, User, Building, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import SEO from '@/components/common/SEO';
 
 const RegisterPage = () => {
   const [firstName, setFirstName] = useState('');
@@ -165,6 +166,10 @@ const RegisterPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
+      <SEO 
+        title="Register" 
+        description="Start your 14-day free trial with OkeBill. India's most powerful GST billing and e-invoicing platform."
+      />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <a href="/" className="flex flex-col items-center">
           <img src="/logo.png" alt="OkeBill" className="h-16 w-16 mb-4" />

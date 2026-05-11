@@ -38,6 +38,7 @@ import RefundPolicyPage from "./pages/RefundPolicyPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
 import ContactSupportPage from "./pages/ContactSupportPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 import NetworkStatus from "./components/common/NetworkStatus";
 
 const queryClient = new QueryClient();
@@ -265,6 +266,16 @@ const App = () => (
                   element={
                     <AuthCheck requireAuth={true}>
                       <BillingPage />
+                    </AuthCheck>
+                  }
+                />
+
+                {/* Admin */}
+                <Route
+                  path="/admin/users"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <AdminUsersPage />
                     </AuthCheck>
                   }
                 />

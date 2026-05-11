@@ -22,6 +22,28 @@ function cleanPhone(phone: string): string {
     return phone.replace(/[\s\-+]/g, '').replace(/^91/, '');
 }
 
+/**
+ * Generate the next sequential user code.
+ * Format: OKB-00001, OKB-00002, etc.
+ */
+async function generateUserCode(): Promise<string> {
+    const prefix = 'OKB-';
+    const lastUser = await prisma.user.findFirst({
+        where: { userCode: { startsWith: prefix } },
+        orderBy: { userCode: 'desc' },
+        select: { userCode: true },
+    });
+
+    let nextNum = 1;
+    if (lastUser?.userCode) {
+        const numPart = lastUser.userCode.replace(prefix, '');
+        const parsed = parseInt(numPart, 10);
+        if (!isNaN(parsed)) nextNum = parsed + 1;
+    }
+
+    return `${prefix}${String(nextNum).padStart(5, '0')}`;
+}
+
 // POST /auth/register
 router.post('/register', async (req, res) => {
     try {
@@ -58,6 +80,7 @@ router.post('/register', async (req, res) => {
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
+        const userCode = await generateUserCode();
         const user = await prisma.user.create({
             data: {
                 email,
@@ -65,6 +88,7 @@ router.post('/register', async (req, res) => {
                 firstName,
                 lastName,
                 companyName,
+                userCode,
                 phone: phone ? cleanPhone(phone) : undefined,
                 panNumber: panNumber ? panNumber.toUpperCase().trim() : undefined,
             },
@@ -93,7 +117,7 @@ router.post('/register', async (req, res) => {
         res.json({
             token,
             user: {
-                id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName,
+                id: user.id, userCode: user.userCode, email: user.email, firstName: user.firstName, lastName: user.lastName,
                 companyName: user.companyName, role: user.role, phone: user.phone,
                 onboardingComplete: user.onboardingComplete,
                 subscription: { plan: 'free_trial', status: 'active', trialEndsAt: trialEnd },
@@ -136,7 +160,7 @@ router.post('/login', async (req, res) => {
         res.json({
             token,
             user: {
-                id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName,
+                id: user.id, userCode: user.userCode, email: user.email, firstName: user.firstName, lastName: user.lastName,
                 companyName: user.companyName, role: user.role, phone: user.phone, phoneVerified: user.phoneVerified,
                 panNumber: user.panNumber, gstin: user.gstin, onboardingComplete: user.onboardingComplete,
                 subscription: subscription ? { plan: subscription.plan, status: subscription.status, trialEndsAt: subscription.trialEndsAt, endDate: subscription.endDate } : null,
@@ -163,7 +187,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
 
         res.json({
             user: {
-                id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName,
+                id: user.id, userCode: user.userCode, email: user.email, firstName: user.firstName, lastName: user.lastName,
                 companyName: user.companyName, role: user.role,
                 phone: user.phone, phoneVerified: user.phoneVerified, emailVerified: user.emailVerified,
                 panNumber: user.panNumber, gstin: user.gstin, onboardingComplete: user.onboardingComplete,
@@ -240,6 +264,7 @@ router.post('/oauth', async (req, res) => {
             isNewUser = true;
             // Create user with a random password hash (they'll use OAuth only)
             const randomPass = await bcrypt.hash(Math.random().toString(36) + Date.now(), 10);
+            const userCode = await generateUserCode();
             user = await prisma.user.create({
                 data: {
                     email,
@@ -247,6 +272,7 @@ router.post('/oauth', async (req, res) => {
                     firstName: firstName || email.split('@')[0],
                     lastName: lastName || '',
                     companyName: '',
+                    userCode,
                     onboardingComplete: false,
                 },
             });
@@ -283,7 +309,7 @@ router.post('/oauth', async (req, res) => {
             token,
             isNewUser,
             user: {
-                id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName,
+                id: user.id, userCode: user.userCode, email: user.email, firstName: user.firstName, lastName: user.lastName,
                 companyName: user.companyName, role: user.role, phone: user.phone,
                 onboardingComplete: user.onboardingComplete,
                 subscription: subscription ? { plan: subscription.plan, status: subscription.status, trialEndsAt: subscription.trialEndsAt, endDate: subscription.endDate } : null,
@@ -319,7 +345,7 @@ router.post('/refresh', authMiddleware, async (req: AuthRequest, res) => {
         res.json({
             token,
             user: {
-                id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName,
+                id: user.id, userCode: user.userCode, email: user.email, firstName: user.firstName, lastName: user.lastName,
                 companyName: user.companyName, role: user.role, phone: user.phone,
                 onboardingComplete: user.onboardingComplete,
                 subscription: subscription ? { plan: subscription.plan, status: subscription.status, trialEndsAt: subscription.trialEndsAt, endDate: subscription.endDate } : null,

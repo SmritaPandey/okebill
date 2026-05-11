@@ -255,6 +255,27 @@ const SettingsPage = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSaveProfile} className="space-y-4">
+                  {/* User ID Badge */}
+                  {user?.userCode && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200">
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Your User ID</p>
+                        <p className="text-lg font-mono font-bold text-blue-700 tracking-wide">{user.userCode}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(user.userCode || '');
+                          toast.success(`User ID ${user.userCode} copied to clipboard`);
+                        }}
+                        className="p-2 rounded-md hover:bg-white/80 text-slate-400 hover:text-blue-600 transition-colors border border-transparent hover:border-slate-200"
+                        title="Copy User ID"
+                      >
+                        <Shield className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First Name</Label>

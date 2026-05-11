@@ -14,12 +14,17 @@ import {
   ChevronRight,
   FileText,
 } from 'lucide-react';
+import SEO from '@/components/common/SEO';
 
 const RefundPolicyPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-emerald-100 selection:text-[#1E3A5F]">
+      <SEO 
+        title="Refund & Cancellation Policy" 
+        description="Transparent information about OkeBill's refund timelines, cancellation process, and subscription lifecycle."
+      />
       {/* Mesh Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-200/20 blur-[120px]" />

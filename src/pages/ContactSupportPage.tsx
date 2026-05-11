@@ -8,6 +8,7 @@ import {
   ArrowLeft, Mail, Phone, Clock, MessageSquare, HelpCircle,
   ChevronDown, ChevronUp, Send, Shield, FileText, MapPin,
 } from 'lucide-react';
+import SEO from '@/components/common/SEO';
 
 const faqs = [
   { q: 'How do I generate a GST-compliant invoice?', a: 'Go to Dashboard → Invoices → Create Invoice. Fill in client details, add items with HSN/SAC codes, and OkeBill automatically calculates CGST/SGST or IGST based on the place of supply.' },
@@ -45,6 +46,10 @@ const ContactSupportPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-emerald-100 selection:text-[#1E3A5F]">
+      <SEO 
+        title="Contact & Support" 
+        description="Need help with GST billing or e-invoicing? Reach out to OkeBill support. We're here to help you 24/7."
+      />
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-200/20 blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#1E3A5F]/10 blur-[120px]" />

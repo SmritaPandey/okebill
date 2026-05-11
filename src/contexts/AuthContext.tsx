@@ -4,6 +4,7 @@ import { authApi, type User as ApiUser } from '@/lib/api-client';
 // Normalized user type that works with both old and new pages
 export interface AppUser {
   id: string;
+  userCode?: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -56,6 +57,7 @@ export const useAuth = () => {
 function apiUserToAppUser(apiUser: ApiUser): AppUser {
   return {
     id: String(apiUser.id),
+    userCode: apiUser.userCode,
     email: apiUser.email,
     firstName: apiUser.firstName,
     lastName: apiUser.lastName,

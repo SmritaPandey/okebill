@@ -25,6 +25,7 @@ import gstRoutes from './routes/gst';
 import hsnRoutes from './routes/hsn';
 import subscriptionRoutes from './routes/subscription';
 import otpRoutes from './routes/otp';
+import adminRoutes from './routes/admin';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -99,6 +100,7 @@ app.use('/gst', gstRoutes);
 app.use('/hsn', hsnRoutes);
 app.use('/subscription', subscriptionRoutes);
 app.use('/otp', otpRoutes);
+app.use('/admin', adminRoutes);
 
 // ─── 404 Handler ────────────────────────────────────────────
 app.use((_req, res) => {

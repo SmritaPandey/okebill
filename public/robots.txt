@@ -13,3 +13,5 @@ Disallow: /invoices
 Disallow: /payments
 Disallow: /analytics
 Disallow: /settings
+
+Sitemap: https://okebill.com/sitemap.xml

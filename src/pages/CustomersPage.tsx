@@ -17,7 +17,9 @@ import {
   MapPin,
   Edit,
   Trash2,
-  Star
+  Star,
+  Copy,
+  Hash
 } from "lucide-react";
 import { customersApi } from "@/lib/api-client";
 import MainLayout from "@/components/layout/MainLayout";
@@ -218,7 +220,7 @@ export function CustomersPage() {
           <CardContent className="pt-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Search customers by name, email, or phone..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input placeholder="Search by name, email, phone, or Customer ID (e.g. CUST-00001)..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
           </CardContent>
         </Card>
@@ -236,13 +238,27 @@ export function CustomersPage() {
               <Card key={customer.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex justify-between items-start">
-                    <div>
+                    <div className="space-y-1.5">
                       <CardTitle className="text-lg">{customer.name}</CardTitle>
-                      <CardDescription className="mt-1 flex items-center gap-1.5">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                          {customer.customerCode || `CUST-${String(customer.id).padStart(5, '0')}`}
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 shadow-sm">
+                          <Hash className="h-3 w-3" />
+                          {customer.customerCode || '—'}
                         </span>
-                      </CardDescription>
+                        <button
+                          onClick={() => {
+                            const code = customer.customerCode;
+                            if (code) {
+                              navigator.clipboard.writeText(code);
+                              toast({ title: "Copied!", description: `Customer ID ${code} copied to clipboard` });
+                            }
+                          }}
+                          className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                          title="Copy Customer ID"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       {getCustomerBadge(customer)}

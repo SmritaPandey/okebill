@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Mail, Lock, ArrowRight, Receipt } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import SEO from '@/components/common/SEO';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -108,6 +109,10 @@ const LoginPage = () => {
 
   return (
     <div className="flex min-h-screen">
+      <SEO 
+        title="Login" 
+        description="Access your OkeBill account to manage GST invoices, e-way bills, and business compliance."
+      />
       {/* Left Panel — Brand */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#1E3A5F] via-[#2C4F7C] to-[#152C48]">
         {/* Decorative elements */}

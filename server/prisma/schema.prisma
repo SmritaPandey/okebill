@@ -14,6 +14,7 @@ datasource db {
 
 model User {
   id             Int       @id @default(autoincrement())
+  userCode       String?   @unique @map("user_code")
   email          String    @unique
   passwordHash   String    @map("password_hash")
   firstName      String    @map("first_name")

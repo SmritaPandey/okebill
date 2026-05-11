@@ -103,6 +103,7 @@ async function apiCall<T>(path: string, options: RequestInit = {}, _isRetry = fa
 
 export interface User {
     id: number;
+    userCode?: string;
     email: string;
     firstName: string;
     lastName: string;
@@ -661,6 +662,66 @@ export const documentsApi = {
             if (!resp.ok) throw new Error('Failed to download PDF');
             return resp.blob();
         }),
+};
+
+// ─── Admin Service ─────────────────────────────────────────
+
+export interface AdminUser {
+    id: number;
+    userCode: string | null;
+    email: string;
+    firstName: string;
+    lastName: string;
+    companyName: string;
+    role: string;
+    phone: string | null;
+    phoneVerified: boolean;
+    emailVerified: boolean;
+    onboardingComplete: boolean;
+    panNumber: string | null;
+    gstin: string | null;
+    companyType: string | null;
+    createdAt: string;
+    updatedAt: string;
+    subscription: {
+        plan: string;
+        status: string;
+        trialEndsAt: string | null;
+        endDate: string | null;
+        amount: number;
+    } | null;
+    stats: {
+        invoices: number;
+        clients: number;
+        proposals: number;
+        contracts?: number;
+        payments?: number;
+    };
+}
+
+export interface AdminStats {
+    totalUsers: number;
+    activeUsers: number;
+    adminUsers: number;
+    trialUsers: number;
+    planBreakdown: Record<string, number>;
+}
+
+export const adminApi = {
+    getStats: () =>
+        apiCall<AdminStats>('/admin/stats'),
+
+    listUsers: (params?: { search?: string; role?: string; status?: string; plan?: string; sortBy?: string; sortOrder?: string; limit?: number; offset?: number }) =>
+        apiCall<{ users: AdminUser[]; total: number }>(`/admin/users${buildQueryString(params || {})}`),
+
+    getUser: (id: number) =>
+        apiCall<AdminUser>(`/admin/users/${id}`),
+
+    changeRole: (id: number, role: string) =>
+        apiCall<{ id: number; userCode: string; email: string; role: string }>(`/admin/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
+
+    changeStatus: (id: number, active: boolean) =>
+        apiCall<{ id: number; userCode: string; email: string; role: string }>(`/admin/users/${id}/status`, { method: 'PATCH', body: JSON.stringify({ active }) }),
 };
 
 export default backend;

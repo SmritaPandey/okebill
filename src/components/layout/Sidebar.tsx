@@ -6,9 +6,11 @@ import {
   Receipt, BarChart, FileCheck,
   CreditCard, Settings, X, ChevronLeft, ChevronRight,
   Package, Warehouse, ShoppingCart, TrendingUp,
-  UserCheck, Truck, PieChart, Crown, RotateCcw, Wallet, RefreshCw
+  UserCheck, Truck, PieChart, Crown, RotateCcw, Wallet, RefreshCw,
+  ShieldCheck
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
@@ -71,6 +73,22 @@ const navSections: NavSection[] = [
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onToggle }) => {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
+  // Build sections — include Admin section only for admin users
+  const sections = isAdmin
+    ? [
+        ...navSections.slice(0, -1),
+        {
+          label: 'Admin',
+          items: [
+            { name: 'Manage Users', href: '/admin/users', icon: ShieldCheck },
+          ],
+        },
+        navSections[navSections.length - 1],
+      ]
+    : navSections;
 
   const renderNavLink = (item: { name: string; href: string; icon: React.ElementType }, isExpanded: boolean, closeFn?: () => void) => (
     <NavLink
@@ -142,7 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onToggle }) => {
           {/* Navigation */}
           <div className="flex-1 py-2 overflow-y-auto">
             <nav className="px-3 space-y-0.5">
-              {navSections.map((section, index) => (
+              {sections.map((section, index) => (
                 <React.Fragment key={section.label}>
                   {index > 0 && renderSectionLabel(section.label, true)}
                   {index === 0 && <div className="pb-1" />}
@@ -190,7 +208,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onToggle }) => {
       {/* Navigation */}
       <div className="flex-1 py-2 overflow-y-auto">
         <nav className={cn("space-y-0.5", open ? "px-3" : "px-2")}>
-          {navSections.map((section, index) => (
+          {sections.map((section, index) => (
             <React.Fragment key={section.label}>
               {index > 0 && renderSectionLabel(section.label, open)}
               {index === 0 && <div className="pb-1" />}
