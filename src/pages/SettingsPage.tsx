@@ -82,13 +82,18 @@ const SettingsPage = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
+  // Detect if user signed up via OAuth (Google/Microsoft) — they won't have a password
+  const isOAuthUser = user?.app_metadata?.provider === 'google' || user?.app_metadata?.provider === 'azure'
+    || user?.app_metadata?.providers?.includes('google') || user?.app_metadata?.providers?.includes('azure')
+    || !!(user as any)?.identities?.some?.((i: any) => i.provider !== 'email');
+
   const handleDeleteAccount = async () => {
     if (!user) return;
     if (deleteConfirmEmail !== user.email) {
       toast.error('Email does not match your account email');
       return;
     }
-    if (!deletePassword) {
+    if (!isOAuthUser && !deletePassword) {
       toast.error('Password is required');
       return;
     }
@@ -98,7 +103,10 @@ const SettingsPage = () => {
       const res = await fetch(`${API_URL}/settings/account`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ password: deletePassword }),
+        body: JSON.stringify({
+          password: isOAuthUser ? undefined : deletePassword,
+          confirmEmail: deleteConfirmEmail,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -994,6 +1002,7 @@ const SettingsPage = () => {
                     className="mt-1"
                   />
                 </div>
+                {!isOAuthUser && (
                 <div>
                   <Label htmlFor="confirm-password" className="text-sm font-medium">
                     Enter your password
@@ -1007,6 +1016,12 @@ const SettingsPage = () => {
                     className="mt-1"
                   />
                 </div>
+                )}
+                {isOAuthUser && (
+                  <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg">
+                    You signed in with Google/Microsoft — no password required. Just confirm your email above.
+                  </p>
+                )}
               </div>
 
               <div className="flex gap-3 mt-6">
@@ -1024,7 +1039,7 @@ const SettingsPage = () => {
                 <Button
                   variant="destructive"
                   className="flex-1"
-                  disabled={isDeleting || deleteConfirmEmail !== user?.email || !deletePassword}
+                  disabled={isDeleting || deleteConfirmEmail !== user?.email || (!isOAuthUser && !deletePassword)}
                   onClick={handleDeleteAccount}
                 >
                   {isDeleting ? (

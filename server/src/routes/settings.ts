@@ -79,11 +79,7 @@ router.post('/onboarding-complete', async (req: AuthRequest, res) => {
 // DELETE /settings/account — permanently delete user account and all data
 router.delete('/account', async (req: AuthRequest, res) => {
     try {
-        const { password } = req.body;
-        if (!password) {
-            res.status(400).json({ message: 'Password is required to confirm account deletion' });
-            return;
-        }
+        const { password, confirmEmail } = req.body;
 
         const user = await prisma.user.findUnique({ where: { id: req.userId! } });
         if (!user) {
@@ -91,12 +87,27 @@ router.delete('/account', async (req: AuthRequest, res) => {
             return;
         }
 
-        // Verify password
-        const bcrypt = await import('bcryptjs');
-        const valid = await bcrypt.compare(password, user.passwordHash);
-        if (!valid) {
-            res.status(401).json({ message: 'Incorrect password' });
-            return;
+        // Determine if this is an OAuth user (no password hash set)
+        const isOAuthUser = !user.passwordHash || user.passwordHash === '';
+
+        if (isOAuthUser) {
+            // OAuth users: verify by confirming their email address
+            if (!confirmEmail || confirmEmail !== user.email) {
+                res.status(400).json({ message: 'Please confirm your email address to delete your account' });
+                return;
+            }
+        } else {
+            // Email/password users: verify password
+            if (!password) {
+                res.status(400).json({ message: 'Password is required to confirm account deletion' });
+                return;
+            }
+            const bcrypt = await import('bcryptjs');
+            const valid = await bcrypt.compare(password, user.passwordHash);
+            if (!valid) {
+                res.status(401).json({ message: 'Incorrect password' });
+                return;
+            }
         }
 
         // Delete everything in a transaction
