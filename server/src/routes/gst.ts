@@ -452,9 +452,17 @@ router.get('/gstr1/export', authMiddleware, async (req: AuthRequest, res) => {
 
 // GET /gst/status — Check GSP configuration status
 router.get('/status', authMiddleware, async (_req: AuthRequest, res) => {
+    const providerNames: Record<string, string> = {
+        masters_india: 'Masters India GSP',
+        nic_sandbox: 'NIC Sandbox (Direct)',
+        adaequare: 'Adaequare GSP',
+        cleartax: 'ClearTax GSP',
+        none: 'Dev Mode (Mock)',
+    };
     res.json({
         gspConfigured: gspService.isConfigured(),
-        provider: gspService.isConfigured() ? 'Masters India' : 'Dev Mode (Mock)',
+        provider: providerNames[gspService.getProvider()] || 'Unknown',
+        providerKey: gspService.getProvider(),
         features: {
             eInvoice: true,
             eWayBill: true,

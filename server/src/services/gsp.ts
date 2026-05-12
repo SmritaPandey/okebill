@@ -106,19 +106,63 @@ export interface EWayBillResponse {
 }
 
 // ─── GSP Client ───────────────────────────────────────────
+// Supports multiple providers:
+//   1. Masters India (MASTERS_INDIA_API_KEY) - Paid GSP
+//   2. NIC Sandbox Direct (NIC_EINVOICE_USERNAME / NIC_EINVOICE_PASSWORD) - Free sandbox
+//   3. Adaequare (ADAEQUARE_API_KEY) - Alternative GSP
+//   4. ClearTax (CLEARTAX_API_KEY) - Alternative GSP
+
+type GspProvider = 'masters_india' | 'nic_sandbox' | 'adaequare' | 'cleartax' | 'none';
 
 class GspService {
     private apiKey: string | undefined;
     private clientId: string | undefined;
-    private baseUrl = 'https://commonapi.mastersindia.co';
+    private provider: GspProvider;
+    private baseUrl: string;
+
+    // NIC Sandbox credentials (free for testing)
+    private nicUsername: string | undefined;
+    private nicPassword: string | undefined;
+    private nicGstin: string | undefined;
 
     constructor() {
         this.apiKey = process.env.MASTERS_INDIA_API_KEY;
         this.clientId = process.env.MASTERS_INDIA_CLIENT_ID;
+        this.nicUsername = process.env.NIC_EINVOICE_USERNAME;
+        this.nicPassword = process.env.NIC_EINVOICE_PASSWORD;
+        this.nicGstin = process.env.NIC_EINVOICE_GSTIN;
+
+        // Determine active provider
+        if (this.apiKey) {
+            this.provider = 'masters_india';
+            this.baseUrl = 'https://commonapi.mastersindia.co';
+        } else if (process.env.ADAEQUARE_API_KEY) {
+            this.provider = 'adaequare';
+            this.baseUrl = 'https://api.adaequare.com';
+            this.apiKey = process.env.ADAEQUARE_API_KEY;
+        } else if (process.env.CLEARTAX_API_KEY) {
+            this.provider = 'cleartax';
+            this.baseUrl = 'https://api.clear.in/einv';
+            this.apiKey = process.env.CLEARTAX_API_KEY;
+        } else if (this.nicUsername && this.nicPassword) {
+            this.provider = 'nic_sandbox';
+            this.baseUrl = 'https://einv-apisandbox.nic.in';
+        } else {
+            this.provider = 'none';
+            this.baseUrl = '';
+        }
+
+        if (this.provider !== 'none') {
+            console.log(`[GSP] Active provider: ${this.provider} (${this.baseUrl})`);
+        }
     }
 
     isConfigured(): boolean {
-        return !!(this.apiKey);
+        return this.provider !== 'none';
+    }
+
+    getProvider(): string {
+        return this.provider;
     }
 
     private async makeRequest(endpoint: string, method: string = 'GET', body?: any): Promise<any> {

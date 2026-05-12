@@ -372,13 +372,163 @@ router.post('/gateway/refund', async (req: AuthRequest, res) => {
 
 // GET /payments/gateway/status — Check Razorpay config status
 router.get('/gateway/status', async (_req: AuthRequest, res) => {
+    const paygConfigured = !!(process.env.PAYG_MERCHANT_KEY_ID && process.env.PAYG_AUTH_KEY);
     res.json({
-        configured: razorpayService.isConfigured(),
-        provider: 'Razorpay',
-        keyId: razorpayService.getKeyId() ? '***' + razorpayService.getKeyId()!.slice(-4) : null,
+        razorpay: {
+            configured: razorpayService.isConfigured(),
+            provider: 'Razorpay',
+            keyId: razorpayService.getKeyId() ? '***' + razorpayService.getKeyId()!.slice(-4) : null,
+        },
+        payg: {
+            configured: paygConfigured,
+            provider: 'PayG',
+            mode: process.env.PAYG_MODE === 'production' ? 'Live' : 'Test (UAT)',
+        },
+        activeGateway: paygConfigured ? 'payg' : razorpayService.isConfigured() ? 'razorpay' : 'none',
         features: ['orders', 'payment_links', 'refunds', 'upi', 'cards', 'netbanking', 'wallets'],
     });
 });
 
-export default router;
+// ═══════════════════════════════════════════════════════════
+// PAYG PAYMENT GATEWAY
+// ═══════════════════════════════════════════════════════════
 
+import { createPaygOrder, getPaygOrderStatus } from '../lib/payg';
+
+// POST /payments/payg/create-order — Create PayG order for invoice
+router.post('/payg/create-order', async (req: AuthRequest, res) => {
+    try {
+        const { invoiceId } = req.body;
+        const invoice = await prisma.invoice.findFirst({
+            where: { id: Number(invoiceId), userId: req.userId },
+            include: { client: true },
+        });
+        if (!invoice) { res.status(404).json({ message: 'Invoice not found' }); return; }
+
+        const existingPayments = await prisma.payment.aggregate({
+            where: { invoiceId: invoice.id },
+            _sum: { amount: true },
+        });
+        const balance = Number(invoice.total) - Number(existingPayments._sum.amount || 0);
+        if (balance <= 0) { res.status(400).json({ message: 'Invoice already fully paid' }); return; }
+
+        const uniqueReqId = `OKE-${invoice.invoiceNumber}-${Date.now()}`;
+        const user = await prisma.user.findUnique({ where: { id: req.userId } });
+
+        const order = await createPaygOrder({
+            uniqueRequestId: uniqueReqId,
+            orderAmount: balance,
+            customerFirstName: invoice.client.name.split(' ')[0] || invoice.client.name,
+            customerLastName: invoice.client.name.split(' ').slice(1).join(' ') || '',
+            customerEmail: invoice.client.contactEmail || '',
+            customerMobile: invoice.client.phone || '',
+            customerAddress: invoice.client.address || '',
+            customerCity: invoice.client.city || '',
+            customerState: invoice.client.state || '',
+            customerZipCode: invoice.client.zipCode || '',
+            productDescription: `Payment for Invoice ${invoice.invoiceNumber} from ${user?.companyName || 'OkeBill'}`,
+            userDefined1: String(invoice.id),
+        });
+
+        res.json({
+            orderKeyId: order.OrderKeyId,
+            paymentUrl: order.PaymentProcessUrl,
+            amount: balance,
+            invoiceNumber: invoice.invoiceNumber,
+            clientName: invoice.client.name,
+            provider: 'payg',
+        });
+    } catch (err: any) {
+        console.error('PayG create-order error:', err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// POST /payments/payg/verify — Check PayG payment status after callback
+router.post('/payg/verify', async (req: AuthRequest, res) => {
+    try {
+        const { orderKeyId, invoiceId } = req.body;
+        if (!orderKeyId) { res.status(400).json({ message: 'orderKeyId is required' }); return; }
+
+        const status = await getPaygOrderStatus(orderKeyId);
+
+        // PaymentStatus: 1 = Success, 2 = Failed, 0 = Pending
+        if (status.PaymentStatus !== 1) {
+            res.json({
+                success: false,
+                status: status.OrderPaymentStatusText || 'Payment not completed',
+                paymentStatus: status.PaymentStatus,
+            });
+            return;
+        }
+
+        // Payment successful — record it
+        const invoice = await prisma.invoice.findFirst({
+            where: { id: Number(invoiceId || status.UserDefinedData?.UserDefined1), userId: req.userId },
+        });
+        if (!invoice) { res.status(404).json({ message: 'Invoice not found' }); return; }
+
+        const amountPaid = status.OrderAmount;
+        const paymentCount = await prisma.payment.count({ where: { userId: req.userId } });
+
+        const payment = await prisma.payment.create({
+            data: {
+                userId: req.userId!,
+                invoiceId: invoice.id,
+                amount: amountPaid,
+                paymentMethod: status.PaymentMethod || 'online',
+                paymentDate: status.PaymentDateTime ? new Date(status.PaymentDateTime) : new Date(),
+                reference: `PAY-${String(paymentCount + 1).padStart(5, '0')}`,
+                notes: `PayG: ${status.PaymentTransactionId || orderKeyId}`,
+                status: 'completed',
+            },
+        });
+
+        // Update invoice status
+        const allPayments = await prisma.payment.aggregate({
+            where: { invoiceId: invoice.id },
+            _sum: { amount: true },
+        });
+        const totalPaid = Number(allPayments._sum.amount || 0);
+        if (totalPaid >= Number(invoice.total)) {
+            await prisma.invoice.update({
+                where: { id: invoice.id },
+                data: { status: 'paid', paidDate: new Date() },
+            });
+        }
+
+        res.json({
+            success: true,
+            paymentId: payment.id,
+            paygTransactionId: status.PaymentTransactionId,
+            amountPaid,
+            totalPaid,
+            fullyPaid: totalPaid >= Number(invoice.total),
+            provider: 'payg',
+        });
+    } catch (err: any) {
+        console.error('PayG verify error:', err);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// GET /payments/payg/status/:orderKeyId — Check PayG order status
+router.get('/payg/status/:orderKeyId', async (req: AuthRequest, res) => {
+    try {
+        const status = await getPaygOrderStatus(req.params.orderKeyId);
+        res.json({
+            orderKeyId: status.OrderKeyId,
+            amount: status.OrderAmount,
+            paymentStatus: status.PaymentStatus,
+            paymentStatusText: status.OrderPaymentStatusText,
+            paymentMethod: status.PaymentMethod,
+            transactionId: status.PaymentTransactionId,
+            paymentDateTime: status.PaymentDateTime,
+            provider: 'payg',
+        });
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+export default router;
