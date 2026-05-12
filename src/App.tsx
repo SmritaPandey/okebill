@@ -45,6 +45,7 @@ import PurchasesPage from "./pages/PurchasesPage";
 import StaffPage from "./pages/StaffPage";
 import StockTransfersPage from "./pages/StockTransfersPage";
 import BarcodesPage from "./pages/BarcodesPage";
+import EWayBillsPage from "./pages/EWayBillsPage";
 
 const queryClient = new QueryClient();
 
@@ -269,6 +270,14 @@ const App = () => (
                   element={
                     <AuthCheck requireAuth={true}>
                       <BarcodesPage />
+                    </AuthCheck>
+                  }
+                />
+                <Route
+                  path="/e-way-bills"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <EWayBillsPage />
                     </AuthCheck>
                   }
                 />

@@ -72,26 +72,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // Simulate real-time notifications
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate random notifications for demo
-      if (Math.random() < 0.1) { // 10% chance every 30 seconds
-        const types = ["info", "success", "warning"] as const;
-        const messages: Array<Omit<Notification, "id" | "timestamp" | "read">> = [
-          { title: "New Sale", message: "A new sale has been completed", type: "success" },
-          { title: "Low Stock Alert", message: "Product XYZ is running low", type: "warning" },
-          { title: "Payment Received", message: "Payment for Invoice #123 received", type: "success" },
-          { title: "System Update", message: "New features are available", type: "info" },
-        ];
-        
-        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-        addNotification(randomMessage);
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
+  // Real-time notifications will come from WebSocket/SSE when implemented
 
   return (
     <NotificationContext.Provider value={{

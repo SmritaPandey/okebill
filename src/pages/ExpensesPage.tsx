@@ -32,17 +32,8 @@ const categoryConfig: Record<ExpenseCategory, { label: string; icon: any; color:
   misc: { label: 'Miscellaneous', icon: Tag, color: 'text-zinc-600', bg: 'bg-zinc-100' },
 };
 
-const sampleExpenses: Expense[] = [
-  { id: 'e1', date: '2026-04-24', description: 'Office rent - April 2026', category: 'rent', amount: 35000, gst: 6300, vendor: 'ABC Properties', paymentMode: 'Bank Transfer', status: 'approved' },
-  { id: 'e2', date: '2026-04-22', description: 'Google Ads campaign Q2', category: 'marketing', amount: 15000, gst: 2700, vendor: 'Google India', paymentMode: 'Credit Card', status: 'approved' },
-  { id: 'e3', date: '2026-04-21', description: 'Electricity bill - April', category: 'utilities', amount: 8500, gst: 1530, vendor: 'BSES Rajdhani', paymentMode: 'UPI', status: 'approved' },
-  { id: 'e4', date: '2026-04-20', description: 'Client meeting travel - Mumbai', category: 'travel', amount: 12400, gst: 0, vendor: 'MakeMyTrip', paymentMode: 'Credit Card', status: 'approved' },
-  { id: 'e5', date: '2026-04-19', description: 'Printer cartridges & paper', category: 'office', amount: 3200, gst: 576, vendor: 'Amazon Business', paymentMode: 'UPI', status: 'approved' },
-  { id: 'e6', date: '2026-04-18', description: 'Internet - April', category: 'telecom', amount: 2999, gst: 540, vendor: 'Airtel Business', paymentMode: 'Auto-debit', status: 'approved' },
-  { id: 'e7', date: '2026-04-25', description: 'Team lunch - client celebration', category: 'food', amount: 4500, gst: 225, vendor: 'Barbeque Nation', paymentMode: 'Credit Card', status: 'pending' },
-  { id: 'e8', date: '2026-04-17', description: 'Stock purchase - USB cables batch', category: 'inventory', amount: 28000, gst: 5040, vendor: 'XYZ Wholesale', paymentMode: 'Bank Transfer', status: 'approved' },
-  { id: 'e9', date: '2026-04-23', description: 'Staff salary - April (part)', category: 'salary', amount: 85000, gst: 0, vendor: 'Payroll', paymentMode: 'Bank Transfer', status: 'pending' },
-];
+// Data will be fetched from API when backend endpoints are available
+const sampleExpenses: Expense[] = [];
 
 const StatCard = ({ icon: Icon, label, value, sub, color, trend }: { icon: any; label: string; value: string; sub?: string; color: string; trend?: { value: string; up: boolean } }) => (
   <div className="bg-white rounded-2xl border border-zinc-200 p-5 hover:shadow-md transition-shadow">
@@ -201,25 +192,27 @@ const ExpensesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* P&L Summary */}
+        {/* P&L Summary — only when data exists */}
+        {expenses.length > 0 && (
         <div className="bg-gradient-to-r from-zinc-900 to-zinc-800 rounded-2xl p-6 text-white">
-          <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">Profit & Loss Snapshot — April 2026</h3>
+          <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">Expense Summary</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <p className="text-sm text-zinc-400">Total Revenue (Invoices)</p>
-              <p className="text-3xl font-bold text-emerald-400">₹4,52,000</p>
-            </div>
             <div>
               <p className="text-sm text-zinc-400">Total Expenses</p>
               <p className="text-3xl font-bold text-red-400">₹{totalExpenses.toLocaleString('en-IN')}</p>
             </div>
             <div>
-              <p className="text-sm text-zinc-400">Net Profit</p>
-              <p className="text-3xl font-bold text-white">₹{(452000 - totalExpenses).toLocaleString('en-IN')}</p>
-              <p className="text-xs text-emerald-400 mt-1">Margin: {((452000 - totalExpenses) / 452000 * 100).toFixed(1)}%</p>
+              <p className="text-sm text-zinc-400">GST Input Credit</p>
+              <p className="text-3xl font-bold text-blue-400">₹{totalGST.toLocaleString('en-IN')}</p>
+            </div>
+            <div>
+              <p className="text-sm text-zinc-400">Categories</p>
+              <p className="text-3xl font-bold text-white">{categoryTotals.length}</p>
+              <p className="text-xs text-zinc-400 mt-1">Tracked this period</p>
             </div>
           </div>
         </div>
+        )}
       </div>
     </MainLayout>
   );

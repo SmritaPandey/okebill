@@ -38,28 +38,14 @@ interface Exchange {
   priceDiff: number; status: 'pending' | 'processing' | 'completed' | 'cancelled';
 }
 
-// Sample data
-const sampleCreditNotes: CreditNote[] = [
-  { id: 'cn1', number: 'CN-001', date: '2026-04-20', invoiceRef: 'INV-1042', client: 'Sharma Electronics', amount: 8500, gst: 1530, total: 10030, reason: 'Defective goods returned', status: 'issued', refundMethod: 'Bank Transfer' },
-  { id: 'cn2', number: 'CN-002', date: '2026-04-18', invoiceRef: 'INV-1038', client: 'Patel Traders', amount: 3200, gst: 576, total: 3776, reason: 'Overcharged - price correction', status: 'applied', refundMethod: 'Adjusted against INV-1050' },
-  { id: 'cn3', number: 'CN-003', date: '2026-04-22', invoiceRef: 'INV-1045', client: 'Kumar Enterprises', amount: 15000, gst: 2700, total: 17700, reason: 'Order cancelled before dispatch', status: 'draft', refundMethod: 'Wallet Credit' },
-];
+// Data will be fetched from API when backend endpoints are available
+const sampleCreditNotes: CreditNote[] = [];
 
-const sampleDebitNotes: DebitNote[] = [
-  { id: 'dn1', number: 'DN-001', date: '2026-04-19', invoiceRef: 'PO-205', supplier: 'ABC Distributors', amount: 5000, gst: 900, total: 5900, reason: 'Short supply - 10 units missing', status: 'issued' },
-  { id: 'dn2', number: 'DN-002', date: '2026-04-21', invoiceRef: 'PO-210', supplier: 'XYZ Wholesale', amount: 2200, gst: 396, total: 2596, reason: 'Quality defect in batch #445', status: 'acknowledged' },
-];
+const sampleDebitNotes: DebitNote[] = [];
 
-const sampleReturns: ReturnRequest[] = [
-  { id: 'rt1', number: 'RET-001', date: '2026-04-20', invoiceRef: 'INV-1042', customer: 'Sharma Electronics', items: [{ name: 'LED Panel 40W', qty: 5, price: 1700 }], reason: 'Defective - flickering issue', status: 'completed', creditNoteId: 'CN-001' },
-  { id: 'rt2', number: 'RET-002', date: '2026-04-22', invoiceRef: 'INV-1048', customer: 'Mehta Store', items: [{ name: 'USB-C Cable 2m', qty: 20, price: 150 }, { name: 'Phone Case', qty: 10, price: 250 }], reason: 'Wrong items delivered', status: 'approved' },
-  { id: 'rt3', number: 'RET-003', date: '2026-04-23', invoiceRef: 'INV-1050', customer: 'Gupta Mobiles', items: [{ name: 'Screen Protector', qty: 50, price: 80 }], reason: 'Damaged in transit', status: 'requested' },
-];
+const sampleReturns: ReturnRequest[] = [];
 
-const sampleExchanges: Exchange[] = [
-  { id: 'ex1', number: 'EXC-001', date: '2026-04-21', invoiceRef: 'INV-1044', customer: 'Verma Traders', returnItems: [{ name: 'Bluetooth Speaker V1', qty: 3, price: 2500 }], newItems: [{ name: 'Bluetooth Speaker V2', qty: 3, price: 2800 }], priceDiff: 900, status: 'completed' },
-  { id: 'ex2', number: 'EXC-002', date: '2026-04-23', invoiceRef: 'INV-1049', customer: 'Singh Electronics', returnItems: [{ name: 'Earbuds Pro', qty: 5, price: 1200 }], newItems: [{ name: 'Earbuds Lite', qty: 5, price: 800 }], priceDiff: -2000, status: 'processing' },
-];
+const sampleExchanges: Exchange[] = [];
 
 const statusColors: Record<string, string> = {
   draft: 'bg-zinc-100 text-zinc-600', issued: 'bg-blue-100 text-blue-700',

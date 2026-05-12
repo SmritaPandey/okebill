@@ -34,14 +34,8 @@ const statusConfig: Record<RStatus, { label: string; color: string; bg: string; 
   draft: { label: 'Draft', color: 'text-blue-700', bg: 'bg-blue-100', icon: Edit },
 };
 
-const sample: RecurringInvoice[] = [
-  { id: 'ri1', name: 'Monthly Retainer - Sharma Electronics', client: 'Sharma Electronics', frequency: 'monthly', amount: 25000, gst: 4500, nextDate: '2026-05-01', lastSent: '2026-04-01', startDate: '2026-01-01', totalSent: 4, status: 'active', autoSend: true, paymentLink: true, items: [{ desc: 'IT Support Retainer', qty: 1, rate: 25000 }] },
-  { id: 'ri2', name: 'Quarterly Maintenance - Patel Traders', client: 'Patel Traders', frequency: 'quarterly', amount: 45000, gst: 8100, nextDate: '2026-07-01', lastSent: '2026-04-01', startDate: '2025-07-01', totalSent: 4, status: 'active', autoSend: true, paymentLink: true, items: [{ desc: 'AMC - Hardware', qty: 1, rate: 30000 }, { desc: 'AMC - Software', qty: 1, rate: 15000 }] },
-  { id: 'ri3', name: 'Weekly Delivery - Fresh Foods Co', client: 'Fresh Foods Co', frequency: 'weekly', amount: 8500, gst: 425, nextDate: '2026-04-28', lastSent: '2026-04-21', startDate: '2026-03-01', totalSent: 8, status: 'active', autoSend: false, paymentLink: true, items: [{ desc: 'Vegetable Supply', qty: 1, rate: 5000 }, { desc: 'Fruit Supply', qty: 1, rate: 3500 }] },
-  { id: 'ri4', name: 'Annual License - Kumar Enterprises', client: 'Kumar Enterprises', frequency: 'yearly', amount: 120000, gst: 21600, nextDate: '2027-01-01', lastSent: '2026-01-01', startDate: '2024-01-01', totalSent: 3, status: 'active', autoSend: true, paymentLink: true, items: [{ desc: 'Software License - Enterprise', qty: 1, rate: 120000 }] },
-  { id: 'ri5', name: 'Monthly Rent - Office Space', client: 'ABC Properties', frequency: 'monthly', amount: 35000, gst: 6300, nextDate: '2026-05-01', lastSent: '2026-04-01', startDate: '2025-06-01', totalSent: 11, status: 'paused', autoSend: true, paymentLink: false, items: [{ desc: 'Office Rent - Unit 204', qty: 1, rate: 35000 }] },
-  { id: 'ri6', name: 'Monthly SEO Package', client: 'Gupta Mobiles', frequency: 'monthly', amount: 15000, gst: 2700, nextDate: '', lastSent: '2026-03-01', startDate: '2025-09-01', endDate: '2026-03-01', totalSent: 7, status: 'completed', autoSend: true, paymentLink: true, items: [{ desc: 'SEO & Content Marketing', qty: 1, rate: 15000 }] },
-];
+// Data will be fetched from API when backend endpoints are available
+const sample: RecurringInvoice[] = [];
 
 const StatCard = ({ icon: Icon, label, value, sub, color }: { icon: any; label: string; value: string; sub?: string; color: string }) => (
   <div className="bg-white rounded-2xl border border-zinc-200 p-5 hover:shadow-md transition-shadow">
