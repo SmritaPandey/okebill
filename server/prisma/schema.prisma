@@ -139,6 +139,7 @@ model Invoice {
   clientId        Int       @map("client_id")
   contractId      Int?      @map("contract_id")
   invoiceNumber   String    @unique @map("invoice_number")
+  invoiceType     String    @default("tax_invoice") @map("invoice_type") // tax_invoice, proforma, estimate
   status          String    @default("draft")
   items           Json      @default("[]")
   subtotal        Decimal   @default(0) @db.Decimal(12, 2)
@@ -455,6 +456,141 @@ model RecurringInvoice {
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
   @@map("recurring_invoices")
+}
+
+// ─── Delivery Challans ─────────────────────────────────────
+
+model DeliveryChallan {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  clientId        Int       @map("client_id")
+  challanNumber   String    @unique @map("challan_number")
+  challanType     String    @default("supply") @map("challan_type") // supply, job_work, sample, exhibition
+  status          String    @default("draft") // draft, sent, converted, cancelled
+  items           Json      @default("[]")
+  subtotal        Decimal   @default(0) @db.Decimal(12, 2)
+  taxAmount       Decimal   @default(0) @map("tax_amount") @db.Decimal(12, 2)
+  total           Decimal   @default(0) @db.Decimal(12, 2)
+  placeOfSupply   String?   @map("place_of_supply")
+  supplyType      String?   @default("intra") @map("supply_type")
+  // Transport details
+  transportMode   String?   @map("transport_mode")
+  vehicleNumber   String?   @map("vehicle_number")
+  transporterName String?   @map("transporter_name")
+  transporterGstin String?  @map("transporter_gstin")
+  distanceKm      Int?      @map("distance_km")
+  ewayBillNumber  String?   @map("eway_bill_number")
+  // Conversion
+  convertedToInvoiceId Int? @map("converted_to_invoice_id")
+  // Dates
+  issueDate       DateTime  @default(now()) @map("issue_date")
+  dueDate         DateTime? @map("due_date")
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("delivery_challans")
+}
+
+// ─── Purchase Invoices ─────────────────────────────────────
+
+model PurchaseInvoice {
+  id                Int       @id @default(autoincrement())
+  userId            Int       @map("user_id")
+  supplierId        Int?      @map("supplier_id")
+  supplierName      String    @map("supplier_name")
+  supplierGstin     String?   @map("supplier_gstin")
+  invoiceNumber     String    @map("invoice_number")
+  purchaseType      String    @default("purchase") @map("purchase_type") // purchase, purchase_return
+  status            String    @default("draft") // draft, received, paid, cancelled
+  items             Json      @default("[]")
+  subtotal          Decimal   @default(0) @db.Decimal(12, 2)
+  taxAmount         Decimal   @default(0) @map("tax_amount") @db.Decimal(12, 2)
+  total             Decimal   @default(0) @db.Decimal(12, 2)
+  placeOfSupply     String?   @map("place_of_supply")
+  supplyType        String?   @default("intra") @map("supply_type")
+  // Payment
+  paymentStatus     String    @default("unpaid") @map("payment_status") // unpaid, partial, paid
+  amountPaid        Decimal   @default(0) @map("amount_paid") @db.Decimal(12, 2)
+  paymentMethod     String?   @map("payment_method")
+  paymentReference  String?   @map("payment_reference")
+  // Transport
+  ewayBillNumber    String?   @map("eway_bill_number")
+  // Dates
+  invoiceDate       DateTime  @default(now()) @map("invoice_date")
+  receivedDate      DateTime? @map("received_date")
+  dueDate           DateTime? @map("due_date")
+  notes             String?   @db.Text
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, invoiceNumber])
+  @@map("purchase_invoices")
+}
+
+// ─── Staff & Attendance ────────────────────────────────────
+
+model StaffMember {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id") // business owner
+  name          String
+  phone         String?
+  email         String?
+  role          String    @default("staff") // staff, manager, cashier
+  salary        Decimal   @default(0) @db.Decimal(12, 2)
+  salaryType    String    @default("monthly") @map("salary_type") // monthly, daily, hourly
+  joiningDate   DateTime  @default(now()) @map("joining_date")
+  status        String    @default("active") // active, inactive, terminated
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  attendance    Attendance[]
+
+  @@map("staff_members")
+}
+
+model Attendance {
+  id          Int       @id @default(autoincrement())
+  staffId     Int       @map("staff_id")
+  date        DateTime  @db.Date
+  clockIn     DateTime? @map("clock_in")
+  clockOut    DateTime? @map("clock_out")
+  status      String    @default("present") // present, absent, half_day, leave
+  hoursWorked Decimal?  @map("hours_worked") @db.Decimal(5, 2)
+  notes       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  staff StaffMember @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, date])
+  @@map("attendance")
+}
+
+// ─── Stock Transfers (Godown/Warehouse) ───────────────────
+
+model StockTransfer {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  transferNumber  String    @unique @map("transfer_number")
+  fromOutletId    Int       @map("from_outlet_id")
+  toOutletId      Int       @map("to_outlet_id")
+  fromOutletName  String    @map("from_outlet_name")
+  toOutletName    String    @map("to_outlet_name")
+  status          String    @default("pending") // pending, in_transit, received, cancelled
+  items           Json      @default("[]") // [{productId, productName, sku, quantity, unit}]
+  totalItems      Int       @default(0) @map("total_items")
+  totalQuantity   Decimal   @default(0) @map("total_quantity") @db.Decimal(15, 4)
+  transportMode   String?   @map("transport_mode")
+  vehicleNumber   String?   @map("vehicle_number")
+  driverName      String?   @map("driver_name")
+  notes           String?   @db.Text
+  transferDate    DateTime  @default(now()) @map("transfer_date")
+  receivedDate    DateTime? @map("received_date")
+  receivedBy      String?   @map("received_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("stock_transfers")
 }
 
 // ─── Email Tracking ────────────────────────────────────────

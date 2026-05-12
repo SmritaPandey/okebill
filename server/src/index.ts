@@ -26,6 +26,11 @@ import hsnRoutes from './routes/hsn';
 import subscriptionRoutes from './routes/subscription';
 import otpRoutes from './routes/otp';
 import adminRoutes from './routes/admin';
+import deliveryChallanRoutes from './routes/delivery-challans';
+import purchaseRoutes from './routes/purchases';
+import staffRoutes from './routes/staff';
+import stockTransferRoutes from './routes/stock-transfers';
+import barcodeRoutes from './routes/barcodes';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -101,6 +106,11 @@ app.use('/hsn', hsnRoutes);
 app.use('/subscription', subscriptionRoutes);
 app.use('/otp', otpRoutes);
 app.use('/admin', adminRoutes);
+app.use('/delivery-challans', deliveryChallanRoutes);
+app.use('/purchases', purchaseRoutes);
+app.use('/staff', staffRoutes);
+app.use('/stock-transfers', stockTransferRoutes);
+app.use('/barcodes', barcodeRoutes);
 
 // ─── 404 Handler ────────────────────────────────────────────
 app.use((_req, res) => {

@@ -54,6 +54,7 @@ const INDIAN_STATES: Record<string, string> = {
 
 const InvoiceForm: React.FC<InvoiceFormProps> = ({ clients, initialData, onSubmit, onCancel, companyStateCode }) => {
   const [clientId, setClientId] = useState(initialData?.clientId || '');
+  const [invoiceType, setInvoiceType] = useState<'tax_invoice' | 'proforma' | 'estimate'>(initialData?.invoiceType || 'tax_invoice');
   const [items, setItems] = useState<InvoiceItem[]>(
     initialData?.items?.length
       ? initialData.items.map(item => ({
@@ -216,6 +217,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ clients, initialData, onSubmi
     onSubmit({
       id: initialData?.id,
       clientId,
+      invoiceType,
       items: items.filter(item => item.description.trim()),
       taxRate,
       dueDate,
@@ -230,6 +232,28 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ clients, initialData, onSubmi
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Invoice Type Selector */}
+      <div className="flex items-center gap-2 bg-zinc-50 p-1 rounded-lg w-fit">
+        {[
+          { value: 'tax_invoice' as const, label: 'Tax Invoice' },
+          { value: 'proforma' as const, label: 'Proforma Invoice' },
+          { value: 'estimate' as const, label: 'Estimate' },
+        ].map(t => (
+          <button
+            key={t.value}
+            type="button"
+            onClick={() => setInvoiceType(t.value)}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              invoiceType === t.value
+                ? 'bg-white text-zinc-900 shadow-sm'
+                : 'text-zinc-500 hover:text-zinc-700'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Client *</Label>

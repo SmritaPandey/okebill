@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import PageHeader from '@/components/common/PageHeader';
 import ProposalList from '@/components/proposals/ProposalList';
@@ -7,6 +7,8 @@ import { FileText } from 'lucide-react';
 import { useProposals, ProposalFormData } from '@/hooks/useProposals';
 import { useClients } from '@/hooks/useClients';
 import { useContracts } from '@/hooks/useContracts';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { 
   Dialog,
   DialogContent,
@@ -19,6 +21,8 @@ const ProposalsPage = () => {
   const { proposals, isLoading, createProposal, updateProposal, deleteProposal, sendProposal } = useProposals();
   const { clients } = useClients();
   const { createContractFromProposal } = useContracts();
+  const { token } = useAuth();
+  const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentProposal, setCurrentProposal] = useState<ProposalFormData | undefined>(undefined);
 
@@ -43,6 +47,25 @@ const ProposalsPage = () => {
   const handleConvertToContract = (id: string) => {
     createContractFromProposal.mutate(id);
   };
+
+  const handleConvertToInvoice = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`${API}/proposals/${id}/convert-to-invoice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ taxRate: 18 }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(data.message || 'Proposal converted to invoice!');
+      } else {
+        const err = await res.json();
+        toast.error(err.message || 'Conversion failed');
+      }
+    } catch {
+      toast.error('Network error');
+    }
+  }, [API, token]);
 
   const handleSubmitForm = (data: ProposalFormData) => {
     if (data.id) {
@@ -97,6 +120,7 @@ const ProposalsPage = () => {
           onDelete={handleDeleteProposal}
           onSend={handleSendProposal}
           onConvertToContract={handleConvertToContract}
+          onConvertToInvoice={handleConvertToInvoice}
           isLoading={isLoading}
         />
       </div>

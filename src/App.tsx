@@ -40,6 +40,11 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import ContactSupportPage from "./pages/ContactSupportPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import NetworkStatus from "./components/common/NetworkStatus";
+import DeliveryChallansPage from "./pages/DeliveryChallansPage";
+import PurchasesPage from "./pages/PurchasesPage";
+import StaffPage from "./pages/StaffPage";
+import StockTransfersPage from "./pages/StockTransfersPage";
+import BarcodesPage from "./pages/BarcodesPage";
 
 const queryClient = new QueryClient();
 
@@ -224,6 +229,46 @@ const App = () => (
                   element={
                     <AuthCheck requireAuth={true}>
                       <SuppliersPage />
+                    </AuthCheck>
+                  }
+                />
+                <Route
+                  path="/delivery-challans"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <DeliveryChallansPage />
+                    </AuthCheck>
+                  }
+                />
+                <Route
+                  path="/purchases"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <PurchasesPage />
+                    </AuthCheck>
+                  }
+                />
+                <Route
+                  path="/staff"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <StaffPage />
+                    </AuthCheck>
+                  }
+                />
+                <Route
+                  path="/stock-transfers"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <StockTransfersPage />
+                    </AuthCheck>
+                  }
+                />
+                <Route
+                  path="/barcodes"
+                  element={
+                    <AuthCheck requireAuth={true}>
+                      <BarcodesPage />
                     </AuthCheck>
                   }
                 />

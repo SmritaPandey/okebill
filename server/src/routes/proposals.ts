@@ -76,4 +76,80 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     } catch (err: any) { res.status(500).json({ message: err.message }); }
 });
 
+// ─── POST /proposals/:id/convert-to-invoice ─────────────────
+// One-click conversion of a quotation/proposal into a tax invoice
+router.post('/:id/convert-to-invoice', async (req: AuthRequest, res) => {
+    try {
+        const proposal = await prisma.proposal.findFirst({
+            where: { id: Number(req.params.id), userId: req.userId },
+            include: { client: true },
+        });
+        if (!proposal) { res.status(404).json({ message: 'Proposal not found' }); return; }
+        if (proposal.status === 'rejected') {
+            res.status(400).json({ message: 'Cannot convert a rejected proposal' }); return;
+        }
+
+        // Create a contract from the proposal
+        const contract = await prisma.contract.create({
+            data: {
+                userId: req.userId!,
+                clientId: proposal.clientId,
+                proposalId: proposal.id,
+                title: proposal.title,
+                status: 'active',
+                value: Number(proposal.total),
+                startDate: new Date(),
+            },
+        });
+
+        // Auto-generate invoice number
+        const count = await prisma.invoice.count({ where: { userId: req.userId } });
+        const invoiceNumber = `INV-${String(count + 1).padStart(5, '0')}`;
+
+        // Parse proposal items
+        const items = Array.isArray(proposal.items) ? proposal.items : [];
+        const subtotal = Number(proposal.total);
+        const taxRate = req.body.taxRate || 18; // Default 18% GST
+        const taxAmount = subtotal * (taxRate / 100);
+        const total = subtotal + taxAmount;
+
+        // Create invoice
+        const invoice = await prisma.invoice.create({
+            data: {
+                userId: req.userId!,
+                clientId: proposal.clientId,
+                contractId: contract.id,
+                invoiceNumber,
+                items: items as any,
+                subtotal,
+                taxAmount,
+                total,
+                dueDate: new Date(Date.now() + 30 * 86400000), // 30 days
+                issueDate: new Date(),
+                notes: `Generated from proposal: ${proposal.title}`,
+                status: 'draft',
+            },
+            include: { client: true },
+        });
+
+        // Mark proposal as accepted
+        await prisma.proposal.update({
+            where: { id: proposal.id },
+            data: { status: 'accepted' },
+        });
+
+        res.status(201).json({
+            invoice,
+            contract,
+            message: `Proposal converted to invoice ${invoiceNumber}`,
+        });
+    } catch (err: any) {
+        if (err.code === 'P2002') {
+            res.status(409).json({ message: 'Invoice number conflict. Please try again.' });
+            return;
+        }
+        res.status(500).json({ message: err.message });
+    }
+});
+
 export default router;

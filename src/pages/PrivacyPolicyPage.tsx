@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   ArrowLeft, Shield, Eye, Database, Lock, UserCheck, Globe,
-  AlertTriangle, Ban, Gavel, ChevronRight, Mail, Clock, FileText, Trash2,
+  AlertTriangle, Ban, Gavel, ChevronRight, Mail, Clock, FileText, Trash2, Server,
 } from 'lucide-react';
 import SEO from '@/components/common/SEO';
 

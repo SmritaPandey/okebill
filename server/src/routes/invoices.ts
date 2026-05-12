@@ -237,9 +237,13 @@ router.get('/:id', async (req: AuthRequest, res) => {
 // ─── POST /invoices ─────────────────────────────────────────
 router.post('/', async (req: AuthRequest, res) => {
     try {
-        // Auto-generate invoice number
+        // Determine invoice type and number prefix
+        const invoiceType = req.body.invoiceType || 'tax_invoice'; // tax_invoice, proforma, estimate
+        const prefix = invoiceType === 'proforma' ? 'PI' : invoiceType === 'estimate' ? 'EST' : 'INV';
+
+        // Auto-generate invoice number with appropriate prefix
         const count = await prisma.invoice.count({ where: { userId: req.userId } });
-        const invoiceNumber = `INV-${String(count + 1).padStart(5, '0')}`;
+        const invoiceNumber = `${prefix}-${String(count + 1).padStart(5, '0')}`;
 
         const { clientId, items, subtotal, tax, taxAmount, total, dueDate, issueDate, notes, contractId, placeOfSupply,
                 ewayBillNumber, transportMode, vehicleNumber, transporterName, transporterGstin, distanceKm } = req.body;
@@ -264,6 +268,7 @@ router.post('/', async (req: AuthRequest, res) => {
                 clientId: Number(clientId),
                 contractId: contractId ? Number(contractId) : undefined,
                 invoiceNumber,
+                invoiceType,
                 items: items || [],
                 subtotal: subtotal || 0,
                 taxAmount: tax || taxAmount || 0,
@@ -465,6 +470,66 @@ router.get('/overdue/check', async (req: AuthRequest, res) => {
         });
         res.json({ updated: result.count, message: `${result.count} invoices marked as overdue` });
     } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// ─── POST /invoices/:id/convert-to-tax-invoice ──────────────
+// Convert a proforma/estimate to a tax invoice
+router.post('/:id/convert-to-tax-invoice', async (req: AuthRequest, res) => {
+    try {
+        const proforma = await prisma.invoice.findFirst({
+            where: { id: Number(req.params.id), userId: req.userId },
+            include: { client: true },
+        });
+        if (!proforma) { res.status(404).json({ message: 'Invoice not found' }); return; }
+        if (proforma.invoiceType === 'tax_invoice') {
+            res.status(400).json({ message: 'This is already a tax invoice' }); return;
+        }
+
+        const count = await prisma.invoice.count({ where: { userId: req.userId } });
+        const invoiceNumber = `INV-${String(count + 1).padStart(5, '0')}`;
+
+        const taxInvoice = await prisma.invoice.create({
+            data: {
+                userId: req.userId!,
+                clientId: proforma.clientId,
+                contractId: proforma.contractId,
+                invoiceNumber,
+                invoiceType: 'tax_invoice',
+                items: proforma.items as any,
+                subtotal: Number(proforma.subtotal),
+                taxAmount: Number(proforma.taxAmount),
+                total: Number(proforma.total),
+                placeOfSupply: proforma.placeOfSupply,
+                supplyType: proforma.supplyType,
+                transportMode: proforma.transportMode,
+                vehicleNumber: proforma.vehicleNumber,
+                transporterName: proforma.transporterName,
+                transporterGstin: proforma.transporterGstin,
+                distanceKm: proforma.distanceKm,
+                dueDate: proforma.dueDate,
+                issueDate: new Date(),
+                notes: `Converted from ${proforma.invoiceType === 'proforma' ? 'Proforma' : 'Estimate'} ${proforma.invoiceNumber}`,
+                status: 'draft',
+            },
+            include: { client: true },
+        });
+
+        // Mark original as converted
+        await prisma.invoice.update({
+            where: { id: proforma.id },
+            data: { status: 'cancelled', notes: `Converted to tax invoice ${invoiceNumber}. ${proforma.notes || ''}` },
+        });
+
+        res.status(201).json({
+            invoice: taxInvoice,
+            message: `Converted to tax invoice ${invoiceNumber}`,
+        });
+    } catch (err: any) {
+        if (err.code === 'P2002') {
+            res.status(409).json({ message: 'Invoice number conflict. Please try again.' }); return;
+        }
         res.status(500).json({ message: err.message });
     }
 });

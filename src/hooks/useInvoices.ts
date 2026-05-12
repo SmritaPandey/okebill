@@ -56,6 +56,7 @@ export interface InvoiceFormData {
   id?: string;
   clientId: string;
   contractId?: string;
+  invoiceType?: 'tax_invoice' | 'proforma' | 'estimate';
   items: {
     id?: string;
     description: string;
@@ -138,6 +139,7 @@ export const useInvoices = () => {
       return invoicesApi.create({
         clientId: Number(invoiceData.clientId),
         contractId: invoiceData.contractId ? Number(invoiceData.contractId) : undefined,
+        invoiceType: invoiceData.invoiceType || 'tax_invoice',
         items: invoiceData.items,
         subtotal,
         tax: taxAmount,

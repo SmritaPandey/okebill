@@ -2,7 +2,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, Send, FileCheck, Link2 } from 'lucide-react';
+import { Pencil, Trash2, Send, FileCheck, Link2, Receipt } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
@@ -24,6 +24,7 @@ interface ProposalListProps {
   onDelete: (id: string) => void;
   onSend: (id: string) => void;
   onConvertToContract: (id: string) => void;
+  onConvertToInvoice?: (id: string) => void;
   isLoading?: boolean;
 }
 
@@ -34,6 +35,7 @@ const ProposalList: React.FC<ProposalListProps> = ({
   onDelete,
   onSend,
   onConvertToContract,
+  onConvertToInvoice,
   isLoading = false,
 }) => {
   const getClientName = (clientId: string) => {
@@ -146,6 +148,13 @@ const ProposalList: React.FC<ProposalListProps> = ({
                       <DropdownMenuItem onClick={() => onConvertToContract(proposal.id!)}>
                         <FileCheck className="mr-2 h-4 w-4" />
                         Convert to Contract
+                      </DropdownMenuItem>
+                    )}
+
+                    {proposal.status !== 'rejected' && onConvertToInvoice && (
+                      <DropdownMenuItem onClick={() => onConvertToInvoice(proposal.id!)}>
+                        <Receipt className="mr-2 h-4 w-4" />
+                        Convert to Invoice
                       </DropdownMenuItem>
                     )}
 

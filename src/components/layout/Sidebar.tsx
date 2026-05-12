@@ -7,7 +7,7 @@ import {
   CreditCard, Settings, X, ChevronLeft, ChevronRight,
   Package, Warehouse, ShoppingCart, TrendingUp,
   UserCheck, Truck, PieChart, Crown, RotateCcw, Wallet, RefreshCw,
-  ShieldCheck
+  ShieldCheck, ClipboardList, ShoppingBag, UsersRound, ArrowRightLeft, Barcode
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
@@ -42,6 +42,8 @@ const navSections: NavSection[] = [
       { name: 'Credit Notes', href: '/credit-notes', icon: RotateCcw },
       { name: 'Expenses', href: '/expenses', icon: Wallet },
       { name: 'Recurring', href: '/recurring', icon: RefreshCw },
+      { name: 'Delivery Challans', href: '/delivery-challans', icon: ClipboardList },
+      { name: 'Purchases', href: '/purchases', icon: ShoppingBag },
     ],
   },
   {
@@ -53,6 +55,9 @@ const navSections: NavSection[] = [
       { name: 'Sales', href: '/sales', icon: TrendingUp },
       { name: 'Customers', href: '/customers', icon: UserCheck },
       { name: 'Suppliers', href: '/suppliers', icon: Truck },
+      { name: 'Staff & Payroll', href: '/staff', icon: UsersRound },
+      { name: 'Stock Transfers', href: '/stock-transfers', icon: ArrowRightLeft },
+      { name: 'Barcodes', href: '/barcodes', icon: Barcode },
     ],
   },
   {
