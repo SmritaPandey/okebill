@@ -423,9 +423,9 @@ router.post('/payg/create-order', async (req: AuthRequest, res) => {
             customerEmail: invoice.client.contactEmail || '',
             customerMobile: invoice.client.phone || '',
             customerAddress: invoice.client.address || '',
-            customerCity: invoice.client.city || '',
-            customerState: invoice.client.state || '',
-            customerZipCode: invoice.client.zipCode || '',
+            customerCity: '',
+            customerState: '',
+            customerZipCode: '',
             productDescription: `Payment for Invoice ${invoice.invoiceNumber} from ${user?.companyName || 'OkeBill'}`,
             userDefined1: String(invoice.id),
         });
@@ -515,7 +515,7 @@ router.post('/payg/verify', async (req: AuthRequest, res) => {
 // GET /payments/payg/status/:orderKeyId — Check PayG order status
 router.get('/payg/status/:orderKeyId', async (req: AuthRequest, res) => {
     try {
-        const status = await getPaygOrderStatus(req.params.orderKeyId);
+        const status = await getPaygOrderStatus(String(req.params.orderKeyId));
         res.json({
             orderKeyId: status.OrderKeyId,
             amount: status.OrderAmount,
