@@ -56,6 +56,8 @@ model User {
   subscriptions    Subscription[]
   paygTransactions PaygTransaction[]
   otpVerifications OtpVerification[]
+  expenses         Expense[]
+  creditNotes      CreditNote[]
 
   @@map("users")
 }
@@ -684,4 +686,53 @@ model OtpVerification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("otp_verifications")
+}
+
+// ─── Expenses ─────────────────────────────────────────────
+
+model Expense {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+  date          DateTime  @default(now())
+  description   String
+  category      String    @default("misc") // rent, utilities, travel, office, marketing, salary, inventory, telecom, food, misc
+  amount        Decimal   @default(0) @db.Decimal(12, 2)
+  gst           Decimal   @default(0) @db.Decimal(12, 2)
+  vendor        String    @default("")
+  paymentMode   String    @default("cash") @map("payment_mode") // cash, bank, upi, card, cheque
+  receipt       String?   // file URL or path
+  status        String    @default("pending") // pending, approved, rejected
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
+}
+
+// ─── Credit Notes ─────────────────────────────────────────
+
+model CreditNote {
+  id               Int       @id @default(autoincrement())
+  userId           Int       @map("user_id")
+  clientId         Int?      @map("client_id")
+  invoiceId        Int?      @map("invoice_id")
+  creditNoteNumber String    @map("credit_note_number")
+  type             String    @default("credit") // credit, debit
+  items            Json      @default("[]")
+  subtotal         Decimal   @default(0) @db.Decimal(12, 2)
+  taxAmount        Decimal   @default(0) @map("tax_amount") @db.Decimal(12, 2)
+  total            Decimal   @default(0) @db.Decimal(12, 2)
+  reason           String?   @db.Text
+  status           String    @default("draft") // draft, issued, applied, cancelled
+  issueDate        DateTime  @default(now()) @map("issue_date")
+  notes            String?   @db.Text
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, creditNoteNumber])
+  @@map("credit_notes")
 }

@@ -31,6 +31,9 @@ import purchaseRoutes from './routes/purchases';
 import staffRoutes from './routes/staff';
 import stockTransferRoutes from './routes/stock-transfers';
 import barcodeRoutes from './routes/barcodes';
+import expenseRoutes from './routes/expenses';
+import creditNoteRoutes from './routes/credit-notes';
+import recurringInvoiceRoutes from './routes/recurring-invoices';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -111,6 +114,9 @@ app.use('/purchases', purchaseRoutes);
 app.use('/staff', staffRoutes);
 app.use('/stock-transfers', stockTransferRoutes);
 app.use('/barcodes', barcodeRoutes);
+app.use('/expenses', expenseRoutes);
+app.use('/credit-notes', creditNoteRoutes);
+app.use('/recurring-invoices', recurringInvoiceRoutes);
 
 // ─── 404 Handler ────────────────────────────────────────────
 app.use((_req, res) => {

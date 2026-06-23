@@ -132,6 +132,19 @@ export const useDashboardStats = () => {
 
   // Backward compatibility: construct old stats shape from KPI data
   const kpi = kpiQuery.data;
+  const monthlyRev = cashFlowQuery.data?.monthlyRevenue || [];
+
+  // Compute MRR from the most recent month's revenue (or average of last 3 months)
+  const recentMonths = monthlyRev.slice(-3);
+  const computedMrr = recentMonths.length > 0
+    ? recentMonths.reduce((sum, m) => sum + m.revenue, 0) / recentMonths.length
+    : kpi?.revenueThisMonth || 0;
+
+  // Estimate churn from client change rate (negative clientsChange = churn)
+  const computedChurn = kpi && kpi.clientsChange < 0
+    ? Math.abs(kpi.clientsChange)
+    : 0;
+
   const stats = kpi ? {
     totalClients: kpi.totalClients,
     activeProposals: 0,
@@ -143,8 +156,8 @@ export const useDashboardStats = () => {
     contractsChange: 0,
     invoicesChange: kpi.invoicesChange,
     revenueChange: kpi.revenueChange,
-    mrr: 0,
-    churnRate: 0,
+    mrr: Math.round(computedMrr),
+    churnRate: Math.round(computedChurn * 10) / 10,
     cashFlowProjection: cashFlowQuery.data?.projection?.total || 0,
   } : null;
 

@@ -1,46 +1,25 @@
 import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { recurringInvoicesApi, clientsApi, type RecurringInvoiceItem } from '@/lib/api-client';
 import {
-  Plus, Search, RefreshCw, Calendar, IndianRupee, CheckCircle,
-  Clock, Pause, Play, Eye, Trash2, Edit, AlertTriangle,
-  ArrowRight, Users, FileText, Bell, XCircle, MoreHorizontal
+  Plus, Search, RefreshCw, Pause, Play, Trash2, IndianRupee,
+  Calendar, Clock, TrendingUp, X, Loader2, AlertCircle
 } from 'lucide-react';
 
-type Frequency = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-type RStatus = 'active' | 'paused' | 'completed' | 'draft';
-
-interface RecurringInvoice {
-  id: string; name: string; client: string; frequency: Frequency;
-  amount: number; gst: number; nextDate: string; lastSent: string;
-  startDate: string; endDate?: string; totalSent: number;
-  status: RStatus; autoSend: boolean; paymentLink: boolean;
-  items: { desc: string; qty: number; rate: number }[];
-}
-
-const freqLabels: Record<Frequency, { label: string; color: string; bg: string }> = {
-  weekly: { label: 'Weekly', color: 'text-blue-700', bg: 'bg-blue-100' },
-  monthly: { label: 'Monthly', color: 'text-emerald-700', bg: 'bg-emerald-100' },
-  quarterly: { label: 'Quarterly', color: 'text-purple-700', bg: 'bg-purple-100' },
-  yearly: { label: 'Yearly', color: 'text-amber-700', bg: 'bg-amber-100' },
+const frequencyLabels: Record<string, string> = {
+  weekly: 'Weekly', monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly',
 };
-
-const statusConfig: Record<RStatus, { label: string; color: string; bg: string; icon: any }> = {
-  active: { label: 'Active', color: 'text-emerald-700', bg: 'bg-emerald-100', icon: Play },
-  paused: { label: 'Paused', color: 'text-amber-700', bg: 'bg-amber-100', icon: Pause },
-  completed: { label: 'Completed', color: 'text-zinc-500', bg: 'bg-zinc-100', icon: CheckCircle },
-  draft: { label: 'Draft', color: 'text-blue-700', bg: 'bg-blue-100', icon: Edit },
-};
-
-// Data will be fetched from API when backend endpoints are available
-const sample: RecurringInvoice[] = [];
 
 const StatCard = ({ icon: Icon, label, value, sub, color }: { icon: any; label: string; value: string; sub?: string; color: string }) => (
   <div className="bg-white rounded-2xl border border-zinc-200 p-5 hover:shadow-md transition-shadow">
     <div className="flex items-center gap-3 mb-3">
-      <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center`}><Icon className="w-5 h-5 text-white" /></div>
+      <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center`}>
+        <Icon className="w-5 h-5 text-white" />
+      </div>
       <span className="text-sm text-zinc-500 font-medium">{label}</span>
     </div>
     <p className="text-2xl font-bold text-zinc-900">{value}</p>
@@ -49,160 +28,267 @@ const StatCard = ({ icon: Icon, label, value, sub, color }: { icon: any; label: 
 );
 
 const RecurringInvoicesPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [items] = useState(sample);
-
-  const active = items.filter(i => i.status === 'active');
-  const monthlyRevenue = active.reduce((s, i) => {
-    const mult = i.frequency === 'weekly' ? 4 : i.frequency === 'monthly' ? 1 : i.frequency === 'quarterly' ? 1/3 : 1/12;
-    return s + (i.amount + i.gst) * mult;
-  }, 0);
-
-  const filtered = items.filter(i => {
-    const matchSearch = i.name.toLowerCase().includes(search.toLowerCase()) || i.client.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === 'all' || i.status === filterStatus;
-    return matchSearch && matchStatus;
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newItem, setNewItem] = useState({
+    clientId: '', frequency: 'monthly', nextDate: '', endDate: '',
+    subtotal: '', taxRate: '', total: '', paymentTermsDays: '30', notes: '',
   });
 
-  const daysUntil = (d: string) => {
-    if (!d) return null;
-    const diff = Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
-    return diff;
+  // Fetch recurring invoices
+  const { data, isLoading } = useQuery({
+    queryKey: ['recurring-invoices', filterStatus],
+    queryFn: () => recurringInvoicesApi.list({
+      status: filterStatus !== 'all' ? filterStatus : undefined,
+      limit: 100,
+    }),
+  });
+
+  // Fetch summary
+  const { data: summary } = useQuery({
+    queryKey: ['recurring-invoices-summary'],
+    queryFn: () => recurringInvoicesApi.summary(),
+  });
+
+  // Fetch clients
+  const { data: clientsData } = useQuery({
+    queryKey: ['clients-for-ri'],
+    queryFn: () => clientsApi.list({ limit: 200 }),
+  });
+
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: (data: Partial<RecurringInvoiceItem>) => recurringInvoicesApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recurring-invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['recurring-invoices-summary'] });
+      toast.success('Recurring invoice created');
+      setShowCreateDialog(false);
+      setNewItem({ clientId: '', frequency: 'monthly', nextDate: '', endDate: '', subtotal: '', taxRate: '', total: '', paymentTermsDays: '30', notes: '' });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  // Toggle mutation
+  const toggleMutation = useMutation({
+    mutationFn: (id: number) => recurringInvoicesApi.toggle(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['recurring-invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['recurring-invoices-summary'] });
+      toast.success(`Invoice ${data.active ? 'activated' : 'paused'}`);
+    },
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => recurringInvoicesApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recurring-invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['recurring-invoices-summary'] });
+      toast.success('Recurring invoice deleted');
+    },
+  });
+
+  const items = data?.recurringInvoices || [];
+  const clients = clientsData?.clients || [];
+
+  const filtered = items.filter(item => {
+    if (!search) return true;
+    const clientName = clients.find(c => c.id === item.clientId)?.name || '';
+    return clientName.toLowerCase().includes(search.toLowerCase());
+  });
+
+  const handleCreate = () => {
+    if (!newItem.clientId || !newItem.nextDate || !newItem.total) {
+      toast.error('Client, next date, and total are required');
+      return;
+    }
+    createMutation.mutate({
+      clientId: parseInt(newItem.clientId),
+      frequency: newItem.frequency,
+      nextDate: newItem.nextDate,
+      endDate: newItem.endDate || undefined,
+      subtotal: parseFloat(newItem.subtotal || '0'),
+      taxRate: parseFloat(newItem.taxRate || '0'),
+      total: parseFloat(newItem.total),
+      paymentTermsDays: parseInt(newItem.paymentTermsDays || '30'),
+      notes: newItem.notes || undefined,
+    });
   };
 
   return (
     <MainLayout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-zinc-900">Recurring Invoices</h1>
-            <p className="text-sm text-zinc-500 mt-1">Automate billing for retainers, subscriptions, and recurring services</p>
+            <p className="text-sm text-zinc-500 mt-1">Automate your billing with scheduled invoices</p>
           </div>
-          <Button onClick={() => toast.success('New recurring invoice form opened')} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl gap-2">
-            <Plus className="w-4 h-4" /> New Schedule
+          <Button onClick={() => setShowCreateDialog(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl gap-2">
+            <Plus className="w-4 h-4" /> New Recurring Invoice
           </Button>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard icon={RefreshCw} label="Active Schedules" value={active.length.toString()} sub={`${items.filter(i=>i.status==='paused').length} paused`} color="bg-emerald-500" />
-          <StatCard icon={IndianRupee} label="Monthly Revenue" value={`₹${Math.round(monthlyRevenue).toLocaleString('en-IN')}`} sub="From recurring" color="bg-blue-500" />
-          <StatCard icon={FileText} label="Total Invoices Sent" value={items.reduce((s,i) => s + i.totalSent, 0).toString()} sub="All time" color="bg-purple-500" />
-          <StatCard icon={Calendar} label="Next Due" value={(() => { const next = active.filter(i=>i.nextDate).sort((a,b) => a.nextDate.localeCompare(b.nextDate))[0]; return next ? next.nextDate : '—'; })()} sub={(() => { const next = active.filter(i=>i.nextDate).sort((a,b) => a.nextDate.localeCompare(b.nextDate))[0]; if (!next) return ''; const d = daysUntil(next.nextDate); return d !== null ? `${d} days away` : ''; })()} color="bg-amber-500" />
-        </div>
-
-        {/* Upcoming schedule */}
-        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 p-5">
-          <h3 className="text-sm font-semibold text-emerald-800 mb-3 flex items-center gap-2"><Bell className="w-4 h-4" /> Upcoming This Week</h3>
-          <div className="flex flex-wrap gap-3">
-            {active.filter(i => { const d = daysUntil(i.nextDate); return d !== null && d >= 0 && d <= 7; }).map(i => (
-              <div key={i.id} className="bg-white rounded-xl px-4 py-3 border border-emerald-200 flex items-center gap-3">
-                <div className="text-sm">
-                  <span className="font-semibold text-zinc-900">{i.client}</span>
-                  <span className="text-zinc-400 mx-2">·</span>
-                  <span className="text-emerald-600 font-bold">₹{(i.amount + i.gst).toLocaleString('en-IN')}</span>
-                </div>
-                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{i.nextDate}</span>
-                {i.autoSend && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Auto-send</span>}
-              </div>
-            ))}
-            {active.filter(i => { const d = daysUntil(i.nextDate); return d !== null && d >= 0 && d <= 7; }).length === 0 && (
-              <p className="text-sm text-emerald-600">No invoices due this week ✅</p>
-            )}
-          </div>
+          <StatCard icon={RefreshCw} label="Active" value={(summary?.activeCount || 0).toString()} sub="Auto-generating" color="bg-emerald-500" />
+          <StatCard icon={Pause} label="Paused" value={(summary?.pausedCount || 0).toString()} color="bg-zinc-500" />
+          <StatCard icon={IndianRupee} label="Est. Monthly Revenue" value={`₹${(summary?.estimatedMonthlyRevenue || 0).toLocaleString('en-IN')}`} color="bg-blue-500" />
+          <StatCard icon={Calendar} label="Total Schedules" value={(summary?.totalCount || 0).toString()} color="bg-purple-500" />
         </div>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-            <Input placeholder="Search schedules..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl border-zinc-200" />
+            <Input placeholder="Search by client..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 rounded-xl border-zinc-200" />
           </div>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="rounded-xl border border-zinc-200 px-3 py-2 text-sm">
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="paused">Paused</option>
-            <option value="completed">Completed</option>
-            <option value="draft">Draft</option>
           </select>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="bg-zinc-50 border-b border-zinc-200">
-                {['Schedule', 'Client', 'Frequency', 'Amount', 'Next Invoice', 'Sent', 'Auto', 'Pay Link', 'Status', ''].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">{h}</th>
-                ))}
-              </tr></thead>
-              <tbody className="divide-y divide-zinc-100">
-                {filtered.map(ri => {
-                  const sc = statusConfig[ri.status];
-                  const fc = freqLabels[ri.frequency];
-                  const days = daysUntil(ri.nextDate);
-                  return (
-                    <tr key={ri.id} className="hover:bg-zinc-50 transition-colors">
-                      <td className="px-4 py-3.5">
-                        <p className="font-medium text-zinc-900 truncate max-w-[220px]">{ri.name}</p>
-                        <p className="text-xs text-zinc-400">Since {ri.startDate}</p>
-                      </td>
-                      <td className="px-4 py-3.5 font-medium">{ri.client}</td>
-                      <td className="px-4 py-3.5"><span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${fc.bg} ${fc.color}`}>{fc.label}</span></td>
-                      <td className="px-4 py-3.5">
-                        <p className="font-bold">₹{(ri.amount + ri.gst).toLocaleString('en-IN')}</p>
-                        <p className="text-xs text-zinc-400">+ ₹{ri.gst.toLocaleString('en-IN')} GST</p>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        {ri.nextDate ? (
-                          <div>
-                            <p className="text-zinc-700">{ri.nextDate}</p>
-                            {days !== null && days >= 0 && <p className={`text-xs ${days <= 3 ? 'text-red-500 font-semibold' : 'text-zinc-400'}`}>{days === 0 ? 'Today!' : `${days}d away`}</p>}
-                          </div>
-                        ) : <span className="text-zinc-300">—</span>}
-                      </td>
-                      <td className="px-4 py-3.5 text-zinc-500">{ri.totalSent} invoices</td>
-                      <td className="px-4 py-3.5">{ri.autoSend ? <CheckCircle className="w-4 h-4 text-emerald-500" /> : <XCircle className="w-4 h-4 text-zinc-300" />}</td>
-                      <td className="px-4 py-3.5">{ri.paymentLink ? <CheckCircle className="w-4 h-4 text-blue-500" /> : <XCircle className="w-4 h-4 text-zinc-300" />}</td>
-                      <td className="px-4 py-3.5">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${sc.bg} ${sc.color}`}>
-                          <sc.icon className="w-3 h-3" /> {sc.label}
+        {/* List */}
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />
+              <span className="ml-2 text-zinc-500">Loading...</span>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-zinc-200 flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
+                <RefreshCw className="w-8 h-8 text-zinc-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-zinc-800">No recurring invoices</h3>
+              <p className="text-sm text-zinc-500 mt-1 max-w-sm">
+                Set up automatic invoicing by creating a recurring schedule.
+              </p>
+              <Button onClick={() => setShowCreateDialog(true)} className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl gap-2">
+                <Plus className="w-4 h-4" /> Create First Schedule
+              </Button>
+            </div>
+          ) : (
+            filtered.map(item => {
+              const client = clients.find(c => c.id === item.clientId);
+              return (
+                <div key={item.id} className="bg-white rounded-2xl border border-zinc-200 p-5 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          item.active ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-600'
+                        }`}>
+                          {item.active ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
+                          {item.active ? 'Active' : 'Paused'}
                         </span>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex gap-1">
-                          {ri.status === 'active' && <button onClick={() => toast.info(`${ri.name} paused`)} className="p-1.5 hover:bg-amber-50 rounded-lg" title="Pause"><Pause className="w-4 h-4 text-amber-500" /></button>}
-                          {ri.status === 'paused' && <button onClick={() => toast.success(`${ri.name} resumed`)} className="p-1.5 hover:bg-emerald-50 rounded-lg" title="Resume"><Play className="w-4 h-4 text-emerald-500" /></button>}
-                          <button className="p-1.5 hover:bg-zinc-100 rounded-lg"><Eye className="w-4 h-4 text-zinc-400" /></button>
-                          <button className="p-1.5 hover:bg-zinc-100 rounded-lg"><Edit className="w-4 h-4 text-zinc-400" /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <span className="text-xs text-zinc-400 bg-zinc-50 px-2 py-0.5 rounded-full">
+                          {frequencyLabels[item.frequency] || item.frequency}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-semibold text-zinc-900">
+                        {client?.name || `Client #${item.clientId}`}
+                      </h3>
+                      <div className="flex flex-wrap gap-4 mt-2 text-sm text-zinc-500">
+                        <span className="flex items-center gap-1"><IndianRupee className="w-3.5 h-3.5" /> ₹{Number(item.total).toLocaleString('en-IN')}</span>
+                        <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> Next: {new Date(item.nextDate).toLocaleDateString('en-IN')}</span>
+                        {item.endDate && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Ends: {new Date(item.endDate).toLocaleDateString('en-IN')}</span>}
+                        <span className="flex items-center gap-1"><TrendingUp className="w-3.5 h-3.5" /> {item.paymentTermsDays} day terms</span>
+                      </div>
+                      {item.notes && <p className="text-sm text-zinc-400 mt-2">{item.notes}</p>}
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => toggleMutation.mutate(item.id)} className={`px-3 py-1.5 rounded-xl text-xs font-medium ${
+                        item.active ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                      }`}>
+                        {item.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                      </button>
+                      <button onClick={() => deleteMutation.mutate(item.id)} className="px-3 py-1.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
-        {/* Dunning info */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-5">
-          <h3 className="text-sm font-semibold text-zinc-700 mb-3 flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-amber-500" /> Payment Reminder Schedule (Dunning)</h3>
-          <div className="flex gap-3 flex-wrap">
-            {[{ day: 'Day 1', desc: 'Friendly reminder', color: 'bg-blue-100 text-blue-700' },
-              { day: 'Day 3', desc: 'Second notice', color: 'bg-amber-100 text-amber-700' },
-              { day: 'Day 7', desc: 'Urgent reminder', color: 'bg-orange-100 text-orange-700' },
-              { day: 'Day 14', desc: 'Final notice', color: 'bg-red-100 text-red-700' },
-            ].map(d => (
-              <div key={d.day} className="flex items-center gap-2">
-                <span className={`px-3 py-1.5 rounded-lg text-xs font-bold ${d.color}`}>{d.day}</span>
-                <ArrowRight className="w-3 h-3 text-zinc-300" />
-                <span className="text-xs text-zinc-500">{d.desc}</span>
+        {/* Create Dialog */}
+        {showCreateDialog && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowCreateDialog(false)}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-6 border-b border-zinc-100">
+                <h2 className="text-lg font-semibold text-zinc-900">New Recurring Invoice</h2>
+                <button onClick={() => setShowCreateDialog(false)} className="p-1 hover:bg-zinc-100 rounded-lg"><X className="w-5 h-5" /></button>
               </div>
-            ))}
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-zinc-700 mb-1 block">Client *</label>
+                  <select value={newItem.clientId} onChange={e => setNewItem({ ...newItem, clientId: e.target.value })} className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm">
+                    <option value="">Select a client</option>
+                    {clients.map(c => (<option key={c.id} value={c.id}>{c.name}</option>))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-zinc-700 mb-1 block">Frequency</label>
+                    <select value={newItem.frequency} onChange={e => setNewItem({ ...newItem, frequency: e.target.value })} className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm">
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="quarterly">Quarterly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-zinc-700 mb-1 block">Payment Terms (days)</label>
+                    <Input type="number" value={newItem.paymentTermsDays} onChange={e => setNewItem({ ...newItem, paymentTermsDays: e.target.value })} className="rounded-xl" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-zinc-700 mb-1 block">Next Invoice Date *</label>
+                    <Input type="date" value={newItem.nextDate} onChange={e => setNewItem({ ...newItem, nextDate: e.target.value })} className="rounded-xl" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-zinc-700 mb-1 block">End Date</label>
+                    <Input type="date" value={newItem.endDate} onChange={e => setNewItem({ ...newItem, endDate: e.target.value })} className="rounded-xl" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-zinc-700 mb-1 block">Subtotal (₹)</label>
+                    <Input type="number" placeholder="0.00" value={newItem.subtotal} onChange={e => setNewItem({ ...newItem, subtotal: e.target.value })} className="rounded-xl" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-zinc-700 mb-1 block">Tax Rate (%)</label>
+                    <Input type="number" placeholder="18" value={newItem.taxRate} onChange={e => setNewItem({ ...newItem, taxRate: e.target.value })} className="rounded-xl" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-zinc-700 mb-1 block">Total (₹) *</label>
+                    <Input type="number" placeholder="0.00" value={newItem.total} onChange={e => setNewItem({ ...newItem, total: e.target.value })} className="rounded-xl font-bold" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-zinc-700 mb-1 block">Notes</label>
+                  <textarea placeholder="Optional notes..." value={newItem.notes} onChange={e => setNewItem({ ...newItem, notes: e.target.value })} className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm min-h-[80px] resize-none" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 p-6 border-t border-zinc-100">
+                <Button variant="outline" onClick={() => setShowCreateDialog(false)} className="rounded-xl">Cancel</Button>
+                <Button onClick={handleCreate} disabled={createMutation.isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl gap-2">
+                  {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  Create Schedule
+                </Button>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-zinc-400 mt-3">Automatic payment reminders are sent via email for overdue recurring invoices. Configure in Settings → Notifications.</p>
-        </div>
+        )}
       </div>
     </MainLayout>
   );

@@ -724,4 +724,178 @@ export const adminApi = {
         apiCall<{ id: number; userCode: string; email: string; role: string }>(`/admin/users/${id}/status`, { method: 'PATCH', body: JSON.stringify({ active }) }),
 };
 
+// ─── Expenses Service ──────────────────────────────────────
+
+export interface Expense {
+    id: number;
+    userId: number;
+    date: string;
+    description: string;
+    category: string;
+    amount: number;
+    gst: number;
+    vendor: string;
+    paymentMode: string;
+    receipt?: string;
+    status: string;
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ExpenseSummary {
+    totalAmount: number;
+    totalGst: number;
+    totalWithGst: number;
+    pendingCount: number;
+    approvedCount: number;
+    categoryBreakdown: Record<string, number>;
+    expenseCount: number;
+}
+
+export const expensesApi = {
+    list: (params?: { search?: string; category?: string; status?: string; limit?: number; offset?: number }) =>
+        apiCall<{ expenses: Expense[]; total: number }>(`/expenses${buildQueryString(params || {})}`),
+
+    summary: () => apiCall<ExpenseSummary>('/expenses/summary'),
+
+    get: (id: number) => apiCall<Expense>(`/expenses/${id}`),
+
+    create: (data: Partial<Expense>) =>
+        apiCall<Expense>('/expenses', { method: 'POST', body: JSON.stringify(data) }),
+
+    update: (id: number, data: Partial<Expense>) =>
+        apiCall<Expense>(`/expenses/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+    updateStatus: (id: number, status: string) =>
+        apiCall<Expense>(`/expenses/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+
+    delete: (id: number) => apiCall<void>(`/expenses/${id}`, { method: 'DELETE' }),
+};
+
+// ─── Credit Notes Service ──────────────────────────────────
+
+export interface CreditNoteItem {
+    id: number;
+    userId: number;
+    clientId?: number;
+    invoiceId?: number;
+    creditNoteNumber: string;
+    type: string;
+    items: any[];
+    subtotal: number;
+    taxAmount: number;
+    total: number;
+    reason?: string;
+    status: string;
+    issueDate: string;
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CreditNoteSummary {
+    creditNotesCount: number;
+    creditNotesTotal: number;
+    creditNotesApplied: number;
+    creditNotesPending: number;
+    debitNotesCount: number;
+    debitNotesTotal: number;
+}
+
+export const creditNotesApi = {
+    list: (params?: { search?: string; type?: string; status?: string; limit?: number; offset?: number }) =>
+        apiCall<{ creditNotes: CreditNoteItem[]; total: number }>(`/credit-notes${buildQueryString(params || {})}`),
+
+    summary: () => apiCall<CreditNoteSummary>('/credit-notes/summary'),
+
+    get: (id: number) => apiCall<CreditNoteItem>(`/credit-notes/${id}`),
+
+    create: (data: Partial<CreditNoteItem>) =>
+        apiCall<CreditNoteItem>('/credit-notes', { method: 'POST', body: JSON.stringify(data) }),
+
+    update: (id: number, data: Partial<CreditNoteItem>) =>
+        apiCall<CreditNoteItem>(`/credit-notes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+    updateStatus: (id: number, status: string) =>
+        apiCall<CreditNoteItem>(`/credit-notes/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+
+    delete: (id: number) => apiCall<void>(`/credit-notes/${id}`, { method: 'DELETE' }),
+};
+
+// ─── Recurring Invoices Service ────────────────────────────
+
+export interface RecurringInvoiceItem {
+    id: number;
+    userId: number;
+    clientId: number;
+    templateItems: any[];
+    subtotal: number;
+    taxRate: number;
+    total: number;
+    frequency: string;
+    nextDate: string;
+    endDate?: string;
+    paymentTermsDays: number;
+    notes?: string;
+    active: boolean;
+    lastGeneratedAt?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface RecurringInvoiceSummary {
+    activeCount: number;
+    pausedCount: number;
+    totalCount: number;
+    estimatedMonthlyRevenue: number;
+}
+
+export const recurringInvoicesApi = {
+    list: (params?: { status?: string; limit?: number; offset?: number }) =>
+        apiCall<{ recurringInvoices: RecurringInvoiceItem[]; total: number }>(`/recurring-invoices${buildQueryString(params || {})}`),
+
+    summary: () => apiCall<RecurringInvoiceSummary>('/recurring-invoices/summary'),
+
+    get: (id: number) => apiCall<RecurringInvoiceItem>(`/recurring-invoices/${id}`),
+
+    create: (data: Partial<RecurringInvoiceItem>) =>
+        apiCall<RecurringInvoiceItem>('/recurring-invoices', { method: 'POST', body: JSON.stringify(data) }),
+
+    update: (id: number, data: Partial<RecurringInvoiceItem>) =>
+        apiCall<RecurringInvoiceItem>(`/recurring-invoices/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+    toggle: (id: number) =>
+        apiCall<RecurringInvoiceItem>(`/recurring-invoices/${id}/toggle`, { method: 'PATCH' }),
+
+    delete: (id: number) => apiCall<void>(`/recurring-invoices/${id}`, { method: 'DELETE' }),
+};
+
+// ─── Subscription Service ──────────────────────────────────
+
+export const subscriptionApi = {
+    getPlans: () => apiCall<any[]>('/subscription/plans'),
+
+    getStatus: () => apiCall<any>('/subscription/status'),
+
+    getHistory: () => apiCall<any>('/subscription/history'),
+
+    checkout: (data: { plan: string; cycle?: string }) =>
+        apiCall<any>('/subscription/checkout', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// ─── GST / E-Way Bills Service ─────────────────────────────
+
+export const gstApi = {
+    getStatus: () => apiCall<any>('/gst/status'),
+
+    verifyGstin: (gstin: string) => apiCall<any>(`/gst/verify/${gstin}`),
+
+    generateEWayBill: (data: any) =>
+        apiCall<any>('/gst/eway-bill/generate', { method: 'POST', body: JSON.stringify(data) }),
+
+    cancelEWayBill: (ewbNo: string, data: { reason: string }) =>
+        apiCall<any>(`/gst/eway-bill/${ewbNo}/cancel`, { method: 'POST', body: JSON.stringify(data) }),
+};
+
 export default backend;
