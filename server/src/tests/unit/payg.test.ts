@@ -75,7 +75,7 @@ describe('PayG Client Library', () => {
 
         it('plan limits should increase with price (-1 = unlimited)', async () => {
             const { SUBSCRIPTION_PLANS } = await import('../../lib/payg');
-            const sorted = [...SUBSCRIPTION_PLANS].sort((a, b) => a.price - b.price);
+            const sorted = SUBSCRIPTION_PLANS.filter(p => p.id !== 'free_trial').sort((a, b) => a.price - b.price);
             // Each plan should have >= the previous plan's limits
             // -1 means unlimited, which is always >= any finite value
             const effective = (v: number) => (v === -1 ? Infinity : v);

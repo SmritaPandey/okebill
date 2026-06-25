@@ -91,7 +91,7 @@ const ProposalList: React.FC<ProposalListProps> = ({
               <TableCell className="font-medium">{proposal.title}</TableCell>
               <TableCell>{getClientName(proposal.clientId)}</TableCell>
               <TableCell>
-                {proposal.amount ? `$${parseFloat(proposal.amount).toFixed(2)}` : '—'}
+                {proposal.amount ? `₹${parseFloat(proposal.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '—'}
               </TableCell>
               <TableCell>
                 {proposal.validUntil ? new Date(proposal.validUntil).toLocaleDateString() : '—'}
