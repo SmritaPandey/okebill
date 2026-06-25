@@ -14,9 +14,9 @@ const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#10B981", "#06b6d4"
 
 export function MetricsChart({ type, data, title }: MetricsChartProps) {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);

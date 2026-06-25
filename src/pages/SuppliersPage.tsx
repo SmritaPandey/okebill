@@ -123,7 +123,7 @@ export function SuppliersPage() {
   };
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
 
   const getSupplierBadge = (supplier: any) => {
     if (supplier.status === "preferred") return <Badge className="bg-green-100 text-green-800">Preferred</Badge>;

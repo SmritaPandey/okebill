@@ -12,12 +12,17 @@ import {
 import MainLayout from "@/components/layout/MainLayout";
 import { posApi } from "@/lib/api-client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCompany } from "@/hooks/useCompany";
+import PosReceiptModal from "@/components/pos/PosReceiptModal";
 
 export function SalesPage() {
   const { user } = useAuth();
+  const { company } = useCompany();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
 
   // Get tenant ID from user settings (default to 1 for now)
   const tenantId = 1;
@@ -228,7 +233,20 @@ export function SalesPage() {
                       <Badge className={getStatusColor(sale.paymentStatus || sale.status)}>
                         {sale.paymentStatus || sale.status}
                       </Badge>
-                      <Button variant="outline" size="sm" className="rounded-xl">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl"
+                        onClick={async () => {
+                          try {
+                            const transaction = await posApi.getTransaction(sale.id);
+                            setSelectedTransaction(transaction);
+                            setIsReceiptOpen(true);
+                          } catch (err) {
+                            console.error("Failed to load transaction:", err);
+                          }
+                        }}
+                      >
                         <Eye className="h-4 w-4 mr-1" /> View
                       </Button>
                     </div>
@@ -270,7 +288,13 @@ export function SalesPage() {
               }
             </p>
           </div>
-        )}
+        {/* POS Bill Receipt Dialog */}
+        <PosReceiptModal
+          isOpen={isReceiptOpen}
+          onClose={() => setIsReceiptOpen(false)}
+          transaction={selectedTransaction}
+          company={company}
+        />
       </div>
     </MainLayout>
   );

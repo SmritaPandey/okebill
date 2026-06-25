@@ -116,7 +116,7 @@ export function CustomersPage() {
   };
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
 
   const getCustomerBadge = (customer: any) => {
     if (customer.status === "vip") return <Badge className="bg-emerald-100 text-emerald-800">VIP</Badge>;

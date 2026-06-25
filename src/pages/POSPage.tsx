@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { productsApi, posApi } from "@/lib/api-client";
 import MainLayout from "@/components/layout/MainLayout";
+import { useCompany } from "@/hooks/useCompany";
+import PosReceiptModal from "@/components/pos/PosReceiptModal";
 
 interface CreateSaleRequest {
   tenantId: number;
@@ -50,6 +52,7 @@ interface CartItem {
 export function POSPage() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { company } = useCompany();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -58,6 +61,8 @@ export function POSPage() {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [taxAmount, setTaxAmount] = useState(0);
   const [showScanner, setShowScanner] = useState(false);
+  const [completedTransaction, setCompletedTransaction] = useState<any>(null);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { data: searchResults } = useQuery<any>({
@@ -75,6 +80,8 @@ export function POSPage() {
       setTaxAmount(0);
       setCustomerId(undefined);
       setSearchQuery("");
+      setCompletedTransaction(sale);
+      setIsReceiptOpen(true);
       toast({
         title: "Sale completed!",
         description: `Transaction ${sale.transactionNumber} for ${formatCurrency(sale.totalAmount)}`,
@@ -91,9 +98,9 @@ export function POSPage() {
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(amount);
   };
 
@@ -474,6 +481,14 @@ export function POSPage() {
           isOpen={showScanner}
           onClose={() => setShowScanner(false)}
           onScan={handleBarcodeScanned}
+        />
+
+        {/* POS Bill Receipt Dialog */}
+        <PosReceiptModal
+          isOpen={isReceiptOpen}
+          onClose={() => setIsReceiptOpen(false)}
+          transaction={completedTransaction}
+          company={company}
         />
       </div>
     </MainLayout>
