@@ -219,11 +219,11 @@ function buildSystemPrompt(context: any, userName: string) {
 ═══════════════════════════════════════════
 
 📊 FINANCIAL OVERVIEW:
-• Total Revenue (all time): $${context.summary.totalRevenue}
-• Revenue This Month: $${context.summary.revenueThisMonth}
-• Revenue Last Month: $${context.summary.revenueLastMonth}
+• Total Revenue (all time): ₹${context.summary.totalRevenue}
+• Revenue This Month: ₹${context.summary.revenueThisMonth}
+• Revenue Last Month: ₹${context.summary.revenueLastMonth}
 • Revenue Growth: ${context.summary.revenueGrowth}%
-• Total Outstanding: $${context.summary.totalOutstanding}
+• Total Outstanding: ₹${context.summary.totalOutstanding}
 • Average Payment Time: ${context.summary.avgPaymentDays} days
 
 📋 INVOICE BREAKDOWN:
@@ -236,11 +236,11 @@ function buildSystemPrompt(context: any, userName: string) {
 • Invoices This Month: ${context.summary.invoicesThisMonth}
 
 🏦 ACCOUNTS RECEIVABLE AGING:
-• Current (not yet due): $${context.aging.current.toFixed(2)}
-• 1-30 days overdue: $${context.aging.days1to30.toFixed(2)}
-• 31-60 days overdue: $${context.aging.days31to60.toFixed(2)}
-• 61-90 days overdue: $${context.aging.days61to90.toFixed(2)}
-• 90+ days overdue: $${context.aging.over90.toFixed(2)}
+• Current (not yet due): ₹${context.aging.current.toFixed(2)}
+• 1-30 days overdue: ₹${context.aging.days1to30.toFixed(2)}
+• 31-60 days overdue: ₹${context.aging.days31to60.toFixed(2)}
+• 61-90 days overdue: ₹${context.aging.days61to90.toFixed(2)}
+• 90+ days overdue: ₹${context.aging.over90.toFixed(2)}
 
 💳 PAYMENTS:
 • Total Payments: ${context.summary.totalPayments}
@@ -250,33 +250,33 @@ function buildSystemPrompt(context: any, userName: string) {
 ${context.clients.map((c: any) => `• ${c.name} — ${c.contactEmail}${c.phone ? `, ${c.phone}` : ''}${c.address ? ` (${c.address})` : ''}`).join('\n')}
 
 🏆 TOP CLIENTS BY REVENUE:
-${context.topClients.length > 0 ? context.topClients.map((c: any) => `• ${c.name}: $${c.revenue}`).join('\n') : '• No payments recorded yet'}
+${context.topClients.length > 0 ? context.topClients.map((c: any) => `• ${c.name}: ₹${c.revenue}`).join('\n') : '• No payments recorded yet'}
 
 ⚠️ TOP CLIENTS BY OUTSTANDING BALANCE:
-${context.topOwing.length > 0 ? context.topOwing.map((c: any) => `• ${c.name}: $${c.outstanding} outstanding${c.overdueCount > 0 ? ` (${c.overdueCount} overdue)` : ''}`).join('\n') : '• All clear!'}
+${context.topOwing.length > 0 ? context.topOwing.map((c: any) => `• ${c.name}: ₹${c.outstanding} outstanding${c.overdueCount > 0 ? ` (${c.overdueCount} overdue)` : ''}`).join('\n') : '• All clear!'}
 
 🔴 OVERDUE INVOICES:
 ${context.overdueInvoices.length > 0
-            ? context.overdueInvoices.map((i: any) => `• ${i.invoiceNumber}: $${i.total} from ${i.clientName} — ${i.daysOverdue} days overdue (due ${i.dueDate})`).join('\n')
+            ? context.overdueInvoices.map((i: any) => `• ${i.invoiceNumber}: ₹${i.total} from ${i.clientName} — ${i.daysOverdue} days overdue (due ${i.dueDate})`).join('\n')
             : '• None! All invoices are on track.'}
 
 📄 RECENT INVOICES:
-${context.recentInvoices.map((i: any) => `• ${i.invoiceNumber}: $${i.total} → ${i.clientName} [${i.status}]`).join('\n')}
+${context.recentInvoices.map((i: any) => `• ${i.invoiceNumber}: ₹${i.total} → ${i.clientName} [${i.status}]`).join('\n')}
 
 📝 PROPOSALS (${context.summary.proposalCount} total, ${context.summary.activeProposalCount} active):
 • Conversion Rate: ${context.summary.proposalConversionRate}%
-• Pipeline Value: $${context.summary.proposalPipeline}
-${context.proposals.map((p: any) => `• "${p.title}" → ${p.clientName}: $${p.total} [${p.status}]`).join('\n')}
+• Pipeline Value: ₹${context.summary.proposalPipeline}
+${context.proposals.map((p: any) => `• "${p.title}" → ${p.clientName}: ₹${p.total} [${p.status}]`).join('\n')}
 
 📜 CONTRACTS (${context.summary.contractCount} total, ${context.summary.activeContractCount} active):
-• Total Active Value: $${context.summary.totalContractValue}
+• Total Active Value: ₹${context.summary.totalContractValue}
 • Expiring Soon (30 days): ${context.summary.expiringContractCount}
-${context.contracts.map((c: any) => `• "${c.title}" → ${c.clientName}: $${c.value} [${c.status}]`).join('\n')}
+${context.contracts.map((c: any) => `• "${c.title}" → ${c.clientName}: ₹${c.value} [${c.status}]`).join('\n')}
 
 ${context.expiringContracts.length > 0 ? `🔶 CONTRACTS EXPIRING SOON:\n${context.expiringContracts.map((c: any) => `• "${c.title}" → ${c.clientName}: expires in ${c.daysUntilExpiry} days`).join('\n')}` : ''}
 
 💰 RECENT PAYMENTS:
-${context.recentPayments.map((p: any) => `• $${p.amount} via ${p.paymentMethod} on ${p.paymentDate} (Ref: ${p.reference || 'N/A'})`).join('\n') || '• No recent payments'}
+${context.recentPayments.map((p: any) => `• ₹${p.amount} via ${p.paymentMethod} on ${p.paymentDate} (Ref: ${p.reference || 'N/A'})`).join('\n') || '• No recent payments'}
 
 📧 RECENT EMAIL ACTIVITY:
 ${context.recentEmails.map((e: any) => `• ${e.subject} → ${e.to} [${e.status}] on ${e.date}`).join('\n') || '• No emails sent yet'}
@@ -304,7 +304,7 @@ FORMAT:
 • Use clear formatting with **bold** for emphasis and bullet points for lists
 • Use emoji sparingly but effectively (📊📋⚠️✅💰📧🔴)
 • Be concise but thorough — answer the exact question, then offer relevant follow-ups
-• For numbers, always format as currency ($X,XXX.XX) or percentages
+• For numbers, always format as currency (₹X,XX,XXX.XX) or percentages
 • When showing multiple items, use ordered or bulleted lists
 
 TONE:
@@ -437,13 +437,13 @@ function generateFallbackResponse(message: string, context: any): string {
     if (/^(hi|hello|hey|good morning|good afternoon|good evening|howdy|sup|what's up)\b/.test(lower)) {
         let greeting = `👋 Hello! I'm your OkeBill billing assistant. Here's a quick snapshot of your billing:\n\n`;
         greeting += `📊 **Quick Overview:**\n`;
-        greeting += `• Revenue this month: **$${context.summary.revenueThisMonth}**\n`;
-        greeting += `• Outstanding: **$${context.summary.totalOutstanding}**\n`;
+        greeting += `• Revenue this month: **₹${context.summary.revenueThisMonth}**\n`;
+        greeting += `• Outstanding: **₹${context.summary.totalOutstanding}**\n`;
         greeting += `• Invoices: ${context.summary.totalInvoices} total (${context.summary.overdueCount} overdue)\n`;
         greeting += `• Clients: ${context.summary.totalClients}\n\n`;
 
         if (context.summary.overdueCount > 0) {
-            greeting += `⚠️ **Heads up:** You have ${context.summary.overdueCount} overdue invoice(s) totaling $${context.overdueInvoices.reduce((s: number, i: any) => s + parseFloat(i.total), 0).toFixed(2)}. Want me to help you follow up?\n\n`;
+            greeting += `⚠️ **Heads up:** You have ${context.summary.overdueCount} overdue invoice(s) totaling ₹${context.overdueInvoices.reduce((s: number, i: any) => s + parseFloat(i.total), 0).toFixed(2)}. Want me to help you follow up?\n\n`;
         }
         if (context.summary.expiringContractCount > 0) {
             greeting += `📜 ${context.summary.expiringContractCount} contract(s) expiring within 30 days.\n\n`;
@@ -462,25 +462,25 @@ function generateFallbackResponse(message: string, context: any): string {
     // ── Overdue / Late / Past Due ─────────────────────────
     if (/overdue|late|past\s*due|unpaid|outstanding|owes?|owed/.test(lower)) {
         if (context.overdueInvoices.length === 0) {
-            return `✅ **Great news!** You have no overdue invoices. All ${context.summary.totalInvoices} invoices are on track.\n\n${context.summary.unpaidCount > 0 ? `📋 You do have **${context.summary.unpaidCount} unpaid** invoice(s) totaling **$${context.summary.totalOutstanding}**, but none are overdue yet.` : 'Everything is fully paid up!'}`;
+            return `✅ **Great news!** You have no overdue invoices. All ${context.summary.totalInvoices} invoices are on track.\n\n${context.summary.unpaidCount > 0 ? `📋 You do have **${context.summary.unpaidCount} unpaid** invoice(s) totaling **₹${context.summary.totalOutstanding}**, but none are overdue yet.` : 'Everything is fully paid up!'}`;
         }
 
         let resp = `⚠️ **Overdue Invoices** (${context.overdueInvoices.length} total)\n\n`;
 
         context.overdueInvoices.forEach((i: any) => {
             const urgency = i.daysOverdue > 60 ? '🔴 CRITICAL' : i.daysOverdue > 30 ? '🟠 HIGH' : '🟡 MODERATE';
-            resp += `${urgency} **${i.invoiceNumber}** — **$${i.total}**\n`;
+            resp += `${urgency} **${i.invoiceNumber}** — **₹${i.total}**\n`;
             resp += `   Client: ${i.clientName} · ${i.daysOverdue} days overdue (due ${i.dueDate})\n\n`;
         });
 
         const totalOverdue = context.overdueInvoices.reduce((s: number, i: any) => s + parseFloat(i.total), 0);
-        resp += `💰 **Total overdue: $${totalOverdue.toFixed(2)}**\n\n`;
+        resp += `💰 **Total overdue: ₹${totalOverdue.toFixed(2)}**\n\n`;
 
         resp += `📊 **Aging Breakdown:**\n`;
-        resp += `• 1-30 days: $${context.aging.days1to30.toFixed(2)}\n`;
-        resp += `• 31-60 days: $${context.aging.days31to60.toFixed(2)}\n`;
-        resp += `• 61-90 days: $${context.aging.days61to90.toFixed(2)}\n`;
-        resp += `• 90+ days: $${context.aging.over90.toFixed(2)}\n\n`;
+        resp += `• 1-30 days: ₹${context.aging.days1to30.toFixed(2)}\n`;
+        resp += `• 31-60 days: ₹${context.aging.days31to60.toFixed(2)}\n`;
+        resp += `• 61-90 days: ₹${context.aging.days61to90.toFixed(2)}\n`;
+        resp += `• 90+ days: ₹${context.aging.over90.toFixed(2)}\n\n`;
 
         resp += `**Recommended actions:**\n`;
         resp += `1. Send payment reminders to overdue clients\n`;
@@ -495,9 +495,9 @@ function generateFallbackResponse(message: string, context: any): string {
         let resp = `📊 **Financial Summary**\n\n`;
 
         resp += `**💰 Revenue:**\n`;
-        resp += `• All-time: **$${context.summary.totalRevenue}**\n`;
-        resp += `• This month: **$${context.summary.revenueThisMonth}**\n`;
-        resp += `• Last month: $${context.summary.revenueLastMonth}\n`;
+        resp += `• All-time: **₹${context.summary.totalRevenue}**\n`;
+        resp += `• This month: **₹${context.summary.revenueThisMonth}**\n`;
+        resp += `• Last month: ₹${context.summary.revenueLastMonth}\n`;
         resp += `• Month-over-month: ${context.summary.revenueGrowth === 'N/A' ? 'N/A' : (parseFloat(context.summary.revenueGrowth) >= 0 ? `📈 +${context.summary.revenueGrowth}%` : `📉 ${context.summary.revenueGrowth}%`)}\n\n`;
 
         resp += `**📋 Invoices:**\n`;
@@ -507,22 +507,22 @@ function generateFallbackResponse(message: string, context: any): string {
 
         resp += `**💳 Payments:**\n`;
         resp += `• Total received: ${context.summary.totalPayments} payments\n`;
-        resp += `• This month: ${context.summary.paymentsThisMonth} payments ($${context.summary.revenueThisMonth})\n\n`;
+        resp += `• This month: ${context.summary.paymentsThisMonth} payments (₹${context.summary.revenueThisMonth})\n\n`;
 
         resp += `**🏦 Outstanding:**\n`;
-        resp += `• Total outstanding: **$${context.summary.totalOutstanding}**\n`;
-        resp += `• Overdue amount: $${context.overdueInvoices.reduce((s: number, i: any) => s + parseFloat(i.total), 0).toFixed(2)}\n\n`;
+        resp += `• Total outstanding: **₹${context.summary.totalOutstanding}**\n`;
+        resp += `• Overdue amount: ₹${context.overdueInvoices.reduce((s: number, i: any) => s + parseFloat(i.total), 0).toFixed(2)}\n\n`;
 
         if (context.topClients.length > 0) {
             resp += `**🏆 Top Clients by Revenue:**\n`;
             context.topClients.forEach((c: any, i: number) => {
-                resp += `${i + 1}. ${c.name}: $${c.revenue}\n`;
+                resp += `${i + 1}. ${c.name}: ₹${c.revenue}\n`;
             });
             resp += '\n';
         }
 
         resp += `**📝 Proposals:** ${context.summary.proposalCount} total (${context.summary.activeProposalCount} active, ${context.summary.proposalConversionRate}% conversion rate)\n`;
-        resp += `**📜 Contracts:** ${context.summary.contractCount} total (${context.summary.activeContractCount} active, $${context.summary.totalContractValue} value)\n\n`;
+        resp += `**📜 Contracts:** ${context.summary.contractCount} total (${context.summary.activeContractCount} active, ₹${context.summary.totalContractValue} value)\n\n`;
 
         if (context.summary.overdueCount > 0) {
             resp += `⚠️ **Action needed:** ${context.summary.overdueCount} overdue invoices need follow-up.`;
@@ -541,7 +541,7 @@ function generateFallbackResponse(message: string, context: any): string {
         context.clients.forEach((c: any) => {
             resp += `**${c.id}.** ${c.name} (${c.contactEmail})\n`;
         });
-        resp += `\nPlease tell me:\n1. The client (name or number)\n2. Items (description, quantity, unit price)\n3. Due date\n\nFor example: *"Create invoice for ${context.clients[0]?.name || 'Client'} — Web design $2000, 1 unit, due in 30 days"*`;
+        resp += `\nPlease tell me:\n1. The client (name or number)\n2. Items (description, quantity, unit price)\n3. Due date\n\nFor example: *"Create invoice for ${context.clients[0]?.name || 'Client'} — Web design ₹2000, 1 unit, due in 30 days"*`;
         return resp;
     }
 
@@ -553,7 +553,7 @@ function generateFallbackResponse(message: string, context: any): string {
             }
             let resp = `📧 **Payment Reminders**\n\nHere are overdue invoices you can send reminders for:\n\n`;
             context.overdueInvoices.forEach((i: any) => {
-                resp += `• **${i.invoiceNumber}** — $${i.total} from ${i.clientName} (${i.daysOverdue} days overdue)\n`;
+                resp += `• **${i.invoiceNumber}** — ₹${i.total} from ${i.clientName} (${i.daysOverdue} days overdue)\n`;
             });
             resp += `\nWould you like me to send reminders to all of them, or a specific one?\n\n`;
             resp += `\`\`\`action\n{"type": "sendReminder", "data": {"invoiceId": ${context.overdueInvoices[0]?.id}}}\n\`\`\``;
@@ -566,7 +566,7 @@ function generateFallbackResponse(message: string, context: any): string {
         }
         let resp = `📧 **Send Invoice to Client**\n\nDraft invoices ready to send:\n\n`;
         unsent.forEach((i: any) => {
-            resp += `• **${i.invoiceNumber}** — $${i.total} → ${i.clientName}\n`;
+            resp += `• **${i.invoiceNumber}** — ₹${i.total} → ${i.clientName}\n`;
         });
         resp += `\nWhich one would you like to send? I'll email it with a PDF attachment.\n\n`;
         resp += `\`\`\`action\n{"type": "sendInvoice", "data": {"invoiceId": ${unsent[0]?.id}}}\n\`\`\``;
@@ -581,9 +581,9 @@ function generateFallbackResponse(message: string, context: any): string {
         }
         let resp = `💰 **Record a Payment**\n\nHere are invoices with outstanding balances:\n\n`;
         payable.slice(0, 10).forEach((i: any) => {
-            resp += `• **${i.invoiceNumber}** — $${i.total} from ${i.clientName} [${i.status}]\n`;
+            resp += `• **${i.invoiceNumber}** — ₹${i.total} from ${i.clientName} [${i.status}]\n`;
         });
-        resp += `\nWhich invoice received a payment? And for how much?\n\nExample: *"${payable[0]?.invoiceNumber} received $${payable[0]?.total}"*`;
+        resp += `\nWhich invoice received a payment? And for how much?\n\nExample: *"${payable[0]?.invoiceNumber} received ₹${payable[0]?.total}"*`;
         return resp;
     }
 
@@ -593,7 +593,7 @@ function generateFallbackResponse(message: string, context: any): string {
             if (context.proposals.length === 0) return `No proposals found to download.`;
             let resp = `📄 **Download Proposal PDF**\n\n`;
             context.proposals.slice(0, 5).forEach((p: any) => {
-                resp += `• "${p.title}" → ${p.clientName} ($${p.total}) [${p.status}]\n`;
+                resp += `• "${p.title}" → ${p.clientName} (₹${p.total}) [${p.status}]\n`;
             });
             resp += `\nWhich proposal would you like to download as PDF?`;
             return resp;
@@ -601,7 +601,7 @@ function generateFallbackResponse(message: string, context: any): string {
         if (context.recentInvoices.length === 0) return `No invoices found to download.`;
         let resp = `📄 **Download Invoice PDF**\n\nRecent invoices:\n\n`;
         context.recentInvoices.slice(0, 8).forEach((i: any) => {
-            resp += `• **${i.invoiceNumber}** — $${i.total} → ${i.clientName} [${i.status}]\n`;
+            resp += `• **${i.invoiceNumber}** — ₹${i.total} → ${i.clientName} [${i.status}]\n`;
         });
         resp += `\nWhich invoice would you like to download as PDF?\n\n`;
         resp += `\`\`\`action\n{"type": "downloadPdf", "data": {"invoiceId": ${context.recentInvoices[0]?.id}}}\n\`\`\``;
@@ -621,7 +621,7 @@ function generateFallbackResponse(message: string, context: any): string {
         resp += `**Recent Invoices:**\n`;
         context.recentInvoices.slice(0, 10).forEach((i: any) => {
             const icon = i.status === 'paid' ? '✅' : i.status === 'overdue' ? '🔴' : i.status === 'sent' ? '📤' : '📝';
-            resp += `${icon} **${i.invoiceNumber}** — $${i.total} → ${i.clientName} [${i.status}]\n`;
+            resp += `${icon} **${i.invoiceNumber}** — ₹${i.total} → ${i.clientName} [${i.status}]\n`;
         });
 
         resp += `\n\`\`\`action\n{"type": "navigate", "data": {"page": "/invoices"}}\n\`\`\``;
@@ -638,8 +638,8 @@ function generateFallbackResponse(message: string, context: any): string {
             const outstanding = context.topOwing.find((o: any) => o.name === c.name);
             const topRev = context.topClients.find((t: any) => t.name === c.name);
             resp += `• **${c.name}** — ${c.contactEmail}`;
-            if (topRev) resp += ` · Revenue: $${topRev.revenue}`;
-            if (outstanding) resp += ` · Outstanding: $${outstanding.outstanding}`;
+            if (topRev) resp += ` · Revenue: ₹${topRev.revenue}`;
+            if (outstanding) resp += ` · Outstanding: ₹${outstanding.outstanding}`;
             resp += '\n';
         });
 
@@ -663,13 +663,13 @@ function generateFallbackResponse(message: string, context: any): string {
 
         let resp = `📝 **Your Proposals** (${context.summary.proposalCount} total)\n\n`;
         resp += `• Active: ${context.summary.activeProposalCount}\n`;
-        resp += `• Pipeline Value: $${context.summary.proposalPipeline}\n`;
+        resp += `• Pipeline Value: ₹${context.summary.proposalPipeline}\n`;
         resp += `• Conversion Rate: ${context.summary.proposalConversionRate}%\n\n`;
 
         if (context.proposals.length > 0) {
             context.proposals.forEach((p: any) => {
                 const icon = p.status === 'accepted' ? '✅' : p.status === 'rejected' ? '❌' : p.status === 'sent' ? '📤' : '📝';
-                resp += `${icon} **"${p.title}"** → ${p.clientName}: $${p.total} [${p.status}]\n`;
+                resp += `${icon} **"${p.title}"** → ${p.clientName}: ₹${p.total} [${p.status}]\n`;
             });
         } else {
             resp += `No proposals yet. Would you like to create one?`;
@@ -683,11 +683,11 @@ function generateFallbackResponse(message: string, context: any): string {
     if (/contracts?/.test(lower)) {
         if (/expir|renew/.test(lower)) {
             if (context.expiringContracts.length === 0) {
-                return `📜 No contracts expiring within the next 30 days. You have **${context.summary.activeContractCount}** active contracts worth **$${context.summary.totalContractValue}**.`;
+                return `📜 No contracts expiring within the next 30 days. You have **${context.summary.activeContractCount}** active contracts worth **₹${context.summary.totalContractValue}**.`;
             }
             let resp = `📜 **Contracts Expiring Soon**\n\n`;
             context.expiringContracts.forEach((c: any) => {
-                resp += `⚠️ **"${c.title}"** → ${c.clientName}: $${c.value} — expires in **${c.daysUntilExpiry} days**\n`;
+                resp += `⚠️ **"${c.title}"** → ${c.clientName}: ₹${c.value} — expires in **${c.daysUntilExpiry} days**\n`;
             });
             resp += `\nWould you like me to help you renew any of these?`;
             return resp;
@@ -695,13 +695,13 @@ function generateFallbackResponse(message: string, context: any): string {
 
         let resp = `📜 **Your Contracts** (${context.summary.contractCount} total)\n\n`;
         resp += `• Active: ${context.summary.activeContractCount}\n`;
-        resp += `• Total Value: $${context.summary.totalContractValue}\n`;
+        resp += `• Total Value: ₹${context.summary.totalContractValue}\n`;
         resp += `• Expiring Soon: ${context.summary.expiringContractCount}\n\n`;
 
         if (context.contracts.length > 0) {
             context.contracts.forEach((c: any) => {
                 const icon = c.status === 'active' ? '🟢' : c.status === 'completed' ? '✅' : '📝';
-                resp += `${icon} **"${c.title}"** → ${c.clientName}: $${c.value} [${c.status}]\n`;
+                resp += `${icon} **"${c.title}"** → ${c.clientName}: ₹${c.value} [${c.status}]\n`;
             });
         }
 
@@ -713,13 +713,13 @@ function generateFallbackResponse(message: string, context: any): string {
     if (/payments?|paid|received|transactions?|payment\s*history/.test(lower) && !/record|log|add/.test(lower)) {
         let resp = `💳 **Payment Summary**\n\n`;
         resp += `• Total payments: **${context.summary.totalPayments}**\n`;
-        resp += `• This month: ${context.summary.paymentsThisMonth} payments ($${context.summary.revenueThisMonth})\n`;
-        resp += `• All-time revenue: $${context.summary.totalRevenue}\n\n`;
+        resp += `• This month: ${context.summary.paymentsThisMonth} payments (₹${context.summary.revenueThisMonth})\n`;
+        resp += `• All-time revenue: ₹${context.summary.totalRevenue}\n\n`;
 
         if (context.recentPayments.length > 0) {
             resp += `**Recent Payments:**\n`;
             context.recentPayments.forEach((p: any) => {
-                resp += `• **$${p.amount}** via ${p.paymentMethod} on ${p.paymentDate} (Ref: ${p.reference || 'N/A'})\n`;
+                resp += `• **₹${p.amount}** via ${p.paymentMethod} on ${p.paymentDate} (Ref: ${p.reference || 'N/A'})\n`;
             });
         }
 
@@ -732,23 +732,23 @@ function generateFallbackResponse(message: string, context: any): string {
         let resp = `🏦 **Accounts Receivable Aging Report**\n\n`;
         resp += `| Period | Amount |\n`;
         resp += `|--------|--------|\n`;
-        resp += `| Current (not due) | $${context.aging.current.toFixed(2)} |\n`;
-        resp += `| 1-30 days overdue | $${context.aging.days1to30.toFixed(2)} |\n`;
-        resp += `| 31-60 days overdue | $${context.aging.days31to60.toFixed(2)} |\n`;
-        resp += `| 61-90 days overdue | $${context.aging.days61to90.toFixed(2)} |\n`;
-        resp += `| 90+ days overdue | $${context.aging.over90.toFixed(2)} |\n`;
-        resp += `| **Total Outstanding** | **$${context.summary.totalOutstanding}** |\n\n`;
+        resp += `| Current (not due) | ₹${context.aging.current.toFixed(2)} |\n`;
+        resp += `| 1-30 days overdue | ₹${context.aging.days1to30.toFixed(2)} |\n`;
+        resp += `| 31-60 days overdue | ₹${context.aging.days31to60.toFixed(2)} |\n`;
+        resp += `| 61-90 days overdue | ₹${context.aging.days61to90.toFixed(2)} |\n`;
+        resp += `| 90+ days overdue | ₹${context.aging.over90.toFixed(2)} |\n`;
+        resp += `| **Total Outstanding** | **₹${context.summary.totalOutstanding}** |\n\n`;
 
         if (context.topOwing.length > 0) {
             resp += `**Clients with largest outstanding balances:**\n`;
             context.topOwing.forEach((c: any) => {
-                resp += `• **${c.name}**: $${c.outstanding}${c.overdueCount > 0 ? ` (${c.overdueCount} overdue)` : ''}\n`;
+                resp += `• **${c.name}**: ₹${c.outstanding}${c.overdueCount > 0 ? ` (${c.overdueCount} overdue)` : ''}\n`;
             });
         }
 
         const totalOverdue = context.aging.days1to30 + context.aging.days31to60 + context.aging.days61to90 + context.aging.over90;
         if (totalOverdue > 0) {
-            resp += `\n⚠️ **$${totalOverdue.toFixed(2)}** is past due. Consider sending reminders or escalating collection efforts for invoices over 60 days.`;
+            resp += `\n⚠️ **₹${totalOverdue.toFixed(2)}** is past due. Consider sending reminders or escalating collection efforts for invoices over 60 days.`;
         }
         return resp;
     }
@@ -758,19 +758,19 @@ function generateFallbackResponse(message: string, context: any): string {
         const expectedIncoming = context.aging.current;
         let resp = `💰 **Cash Flow Snapshot**\n\n`;
         resp += `**Incoming (Expected):**\n`;
-        resp += `• Current invoices (not yet due): $${context.aging.current.toFixed(2)}\n`;
-        resp += `• Overdue (may collect): $${(context.aging.days1to30 + context.aging.days31to60).toFixed(2)}\n`;
-        resp += `• Proposal pipeline: $${context.summary.proposalPipeline}\n\n`;
+        resp += `• Current invoices (not yet due): ₹${context.aging.current.toFixed(2)}\n`;
+        resp += `• Overdue (may collect): ₹${(context.aging.days1to30 + context.aging.days31to60).toFixed(2)}\n`;
+        resp += `• Proposal pipeline: ₹${context.summary.proposalPipeline}\n\n`;
         resp += `**Recent Trend:**\n`;
-        resp += `• This month: $${context.summary.revenueThisMonth} received\n`;
-        resp += `• Last month: $${context.summary.revenueLastMonth} received\n`;
+        resp += `• This month: ₹${context.summary.revenueThisMonth} received\n`;
+        resp += `• Last month: ₹${context.summary.revenueLastMonth} received\n`;
         resp += `• Growth: ${context.summary.revenueGrowth}%\n\n`;
         resp += `**Tips to improve cash flow:**\n`;
         resp += `1. Send reminders for ${context.summary.overdueCount} overdue invoices\n`;
         resp += `2. Follow up on ${context.summary.sentCount} sent invoices\n`;
         resp += `3. Convert ${context.summary.draftCount} draft invoices to sent\n`;
         if (context.summary.activeProposalCount > 0) {
-            resp += `4. Follow up on ${context.summary.activeProposalCount} active proposals ($${context.summary.proposalPipeline} pipeline)`;
+            resp += `4. Follow up on ${context.summary.activeProposalCount} active proposals (₹${context.summary.proposalPipeline} pipeline)`;
         }
         return resp;
     }
@@ -791,14 +791,14 @@ function generateFallbackResponse(message: string, context: any): string {
         resp += '\n\n';
 
         resp += `**Financial Overview:**\n`;
-        resp += `• Revenue: ${clientRevenue ? `$${clientRevenue.revenue}` : '$0.00'}\n`;
-        resp += `• Outstanding: ${clientOwing ? `$${clientOwing.outstanding}` : '$0.00'}\n\n`;
+        resp += `• Revenue: ${clientRevenue ? `₹${clientRevenue.revenue}` : '₹0.00'}\n`;
+        resp += `• Outstanding: ${clientOwing ? `₹${clientOwing.outstanding}` : '₹0.00'}\n\n`;
 
         if (clientInvoices.length > 0) {
             resp += `**Invoices (${clientInvoices.length}):**\n`;
             clientInvoices.forEach((i: any) => {
                 const icon = i.status === 'paid' ? '✅' : i.status === 'overdue' ? '🔴' : '📤';
-                resp += `${icon} ${i.invoiceNumber}: $${i.total} [${i.status}]\n`;
+                resp += `${icon} ${i.invoiceNumber}: ₹${i.total} [${i.status}]\n`;
             });
             resp += '\n';
         }
@@ -817,7 +817,7 @@ function generateFallbackResponse(message: string, context: any): string {
 
     // ── Thank you / Goodbye ───────────────────────────────
     if (/thank|thanks|great|awesome|perfect|goodbye|bye|that'?s? all/.test(lower)) {
-        return `😊 You're welcome! I'm here anytime you need help with billing. Have a great day!\n\n${context.summary.overdueCount > 0 ? `💡 **Reminder:** Don't forget about the ${context.summary.overdueCount} overdue invoice(s) worth $${context.overdueInvoices.reduce((s: number, i: any) => s + parseFloat(i.total), 0).toFixed(2)}.` : '✅ Your billing is in great shape!'}`;
+        return `😊 You're welcome! I'm here anytime you need help with billing. Have a great day!\n\n${context.summary.overdueCount > 0 ? `💡 **Reminder:** Don't forget about the ${context.summary.overdueCount} overdue invoice(s) worth ₹${context.overdueInvoices.reduce((s: number, i: any) => s + parseFloat(i.total), 0).toFixed(2)}.` : '✅ Your billing is in great shape!'}`;
     }
 
     // ── What can you do / Help ────────────────────────────

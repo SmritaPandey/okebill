@@ -200,7 +200,7 @@ model Tenant {
   name               String
   subdomain          String    @unique
   industry           String
-  currency           String    @default("USD") @db.VarChar(3)
+  currency           String    @default("INR") @db.VarChar(3)
   timezone           String    @default("UTC")
   financialYearStart DateTime? @map("financial_year_start")
   taxSettings        Json      @default("{}") @map("tax_settings")
