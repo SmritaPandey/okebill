@@ -136,6 +136,12 @@ export const authApi = {
     changePassword: (params: { currentPassword: string; newPassword: string }) =>
         apiCall<{ success: boolean; message: string; token: string }>('/auth/change-password', { method: 'POST', body: JSON.stringify(params) }),
 
+    forgotPassword: (email: string) =>
+        apiCall<{ message: string; warning?: string }>('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }),
+
+    resetPassword: (params: { email: string; otp: string; newPassword: string }) =>
+        apiCall<{ success: boolean; message: string }>('/auth/reset-password', { method: 'POST', body: JSON.stringify(params) }),
+
     exportData: () => apiCall<Blob>('/auth/export-data', { method: 'GET' }),
 };
 

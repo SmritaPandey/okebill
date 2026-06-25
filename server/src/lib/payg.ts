@@ -188,17 +188,30 @@ export async function getPaygOrderStatus(orderKeyId: string): Promise<PaygOrderR
 // ─── Subscription plans ────────────────────────────────────
 export const SUBSCRIPTION_PLANS = [
     {
+        id: 'free',
+        name: 'Free Tier',
+        price: 0,
+        duration: 36500, // 100 years
+        features: [
+            'Up to 3 invoices/month',
+            'Up to 2 clients',
+            'Basic invoice templates',
+            'Email support',
+        ],
+        limits: { invoicesPerMonth: 3, clients: 2 },
+    },
+    {
         id: 'free_trial',
         name: 'Free Trial',
         price: 0,
         duration: 14, // days
         features: [
-            'Up to 5 invoices/month',
-            'Up to 3 clients',
-            'Basic invoice templates',
-            'Email support',
+            'Unlimited invoices during trial',
+            'Unlimited clients during trial',
+            'All premium features enabled',
+            'Email & chat support',
         ],
-        limits: { invoicesPerMonth: 5, clients: 3 },
+        limits: { invoicesPerMonth: -1, clients: -1 },
     },
     {
         id: 'starter',

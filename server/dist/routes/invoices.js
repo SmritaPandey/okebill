@@ -41,6 +41,7 @@ const prisma_1 = __importDefault(require("../lib/prisma"));
 const auth_1 = require("../middleware/auth");
 const multer_1 = __importDefault(require("multer"));
 const XLSX = __importStar(require("xlsx"));
+const payg_1 = require("../lib/payg");
 const router = (0, express_1.Router)();
 router.use(auth_1.authMiddleware);
 // Multer memory storage for file uploads
@@ -272,6 +273,52 @@ router.get('/:id', async (req, res) => {
 // ─── POST /invoices ─────────────────────────────────────────
 router.post('/', async (req, res) => {
     try {
+        // Check subscription limits
+        const subscription = await prisma_1.default.subscription.findFirst({
+            where: { userId: req.userId },
+            orderBy: { createdAt: 'desc' },
+        });
+        const planId = subscription?.plan || 'free';
+        let isExpired = false;
+        if (subscription?.plan === 'free_trial' && subscription.trialEndsAt) {
+            if (new Date() > subscription.trialEndsAt) {
+                isExpired = true;
+                if (subscription.status === 'active') {
+                    await prisma_1.default.subscription.update({
+                        where: { id: subscription.id },
+                        data: { status: 'expired' },
+                    });
+                }
+            }
+        }
+        if (subscription?.status === 'expired' || isExpired) {
+            res.status(403).json({ message: 'Your subscription has expired. Please upgrade or downgrade to the Free Tier.' });
+            return;
+        }
+        const plan = payg_1.SUBSCRIPTION_PLANS.find(p => p.id === planId);
+        const limit = plan?.limits?.invoicesPerMonth ?? 3; // Default to free tier limit
+        if (limit !== -1) {
+            const startOfMonth = new Date();
+            startOfMonth.setDate(1);
+            startOfMonth.setHours(0, 0, 0, 0);
+            const endOfMonth = new Date();
+            endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+            endOfMonth.setDate(0);
+            endOfMonth.setHours(23, 59, 59, 999);
+            const currentInvoicesCount = await prisma_1.default.invoice.count({
+                where: {
+                    userId: req.userId,
+                    createdAt: {
+                        gte: startOfMonth,
+                        lte: endOfMonth,
+                    },
+                },
+            });
+            if (currentInvoicesCount >= limit) {
+                res.status(403).json({ message: `Monthly invoice limit reached. You can only create up to ${limit} invoices per month on the ${plan?.name || 'Free Tier'}. Please upgrade to create more.` });
+                return;
+            }
+        }
         // Determine invoice type and number prefix
         const invoiceType = req.body.invoiceType || 'tax_invoice'; // tax_invoice, proforma, estimate
         const prefix = invoiceType === 'proforma' ? 'PI' : invoiceType === 'estimate' ? 'EST' : 'INV';

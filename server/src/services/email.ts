@@ -244,6 +244,26 @@ export async function sendPaymentReceiptEmail(data: {
     });
 }
 
+export async function sendPasswordResetEmail(to: string, otpCode: string, name: string) {
+    const body = `
+        <h2>Password Reset OTP</h2>
+        <p>Hi ${name},</p>
+        <p>We received a request to reset the password for your OkeBill account. Use the following One-Time Password (OTP) to reset your password:</p>
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; text-align: center; margin: 16px 0;">
+            <span style="font-size: 32px; font-weight: 700; letter-spacing: 4px; color: #1E3A5F;">${otpCode}</span>
+            <p style="color: #6b7280; font-size: 12px; margin: 8px 0 0;">This OTP is valid for 10 minutes and can only be used once.</p>
+        </div>
+        <p>If you did not request a password reset, please ignore this email.</p>
+    `;
+
+    return transporter.sendMail({
+        from: `"OkeBill Support" <${FROM_EMAIL}>`,
+        to,
+        subject: `Password Reset OTP: ${otpCode}`,
+        html: baseTemplate('Password Reset Request', body, 'OkeBill'),
+    });
+}
+
 export function isEmailConfigured(): boolean {
     return !!(process.env.SMTP_USER && process.env.SMTP_PASS);
 }

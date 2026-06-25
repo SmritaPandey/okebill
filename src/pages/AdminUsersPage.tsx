@@ -133,6 +133,7 @@ export default function AdminUsersPage() {
                 <SelectTrigger className="w-[160px]"><SelectValue placeholder="Plan" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Plans</SelectItem>
+                  <SelectItem value="free">Free Tier</SelectItem>
                   <SelectItem value="free_trial">Free Trial</SelectItem>
                   <SelectItem value="starter">Starter</SelectItem>
                   <SelectItem value="professional">Professional</SelectItem>

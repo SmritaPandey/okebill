@@ -43,6 +43,7 @@ interface Transaction {
 }
 
 const planIcons: Record<string, React.ElementType> = {
+    free: Shield,
     free_trial: Clock,
     starter: Zap,
     professional: Rocket,
@@ -50,6 +51,7 @@ const planIcons: Record<string, React.ElementType> = {
 };
 
 const planColors: Record<string, string> = {
+    free: 'from-slate-500 to-slate-600',
     free_trial: 'from-gray-500 to-gray-600',
     starter: 'from-blue-500 to-blue-600',
     professional: 'from-[#1E3A5F] to-[#2C4F7C]',

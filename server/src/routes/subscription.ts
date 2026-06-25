@@ -369,4 +369,60 @@ router.post('/invoice-payment', authMiddleware, async (req: AuthRequest, res) =>
     }
 });
 
+// ─── POST /subscription/downgrade-free ───────────────────
+// Downgrade to Free Tier and delete all trial data
+router.post('/downgrade-free', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const userId = req.userId!;
+
+        // 1. Delete all transactional trial data
+        await prisma.$transaction([
+            prisma.payment.deleteMany({ where: { userId } }),
+            prisma.invoice.deleteMany({ where: { userId } }),
+            prisma.client.deleteMany({ where: { userId } }),
+            prisma.proposal.deleteMany({ where: { userId } }),
+            prisma.contract.deleteMany({ where: { userId } }),
+            prisma.expense.deleteMany({ where: { userId } }),
+            prisma.creditNote.deleteMany({ where: { userId } }),
+            prisma.recurringInvoice.deleteMany({ where: { userId } }),
+            prisma.notification.deleteMany({ where: { userId } }),
+            prisma.file.deleteMany({ where: { userId } }),
+        ]);
+
+        // 2. Find or create/update subscription to 'free' plan
+        const existingSub = await prisma.subscription.findFirst({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        if (existingSub) {
+            await prisma.subscription.update({
+                where: { id: existingSub.id },
+                data: {
+                    plan: 'free',
+                    status: 'active',
+                    endDate: new Date(Date.now() + 36500 * 24 * 60 * 60 * 1000), // 100 years
+                    trialEndsAt: null,
+                    amount: 0,
+                },
+            });
+        } else {
+            await prisma.subscription.create({
+                data: {
+                    userId,
+                    plan: 'free',
+                    status: 'active',
+                    endDate: new Date(Date.now() + 36500 * 24 * 60 * 60 * 1000),
+                    amount: 0,
+                },
+            });
+        }
+
+        res.json({ success: true, message: 'Downgraded to Free Tier. All trial data has been cleared.' });
+    } catch (err: any) {
+        console.error('Downgrade to free error:', err);
+        res.status(500).json({ message: err.message || 'Failed to downgrade to Free Tier' });
+    }
+});
+
 export default router;

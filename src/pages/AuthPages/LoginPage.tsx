@@ -7,6 +7,8 @@ import { Mail, Lock, ArrowRight, Receipt } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import SEO from '@/components/common/SEO';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { authApi } from '@/lib/api-client';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -16,6 +18,14 @@ const LoginPage = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { signIn, oauthLogin } = useAuth();
+  
+  // Forgot Password States
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotOtp, setForgotOtp] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotStep, setForgotStep] = useState(1);
+  const [isForgotLoading, setIsForgotLoading] = useState(false);
 
   // Show message if redirected due to session expiry
   useEffect(() => {
@@ -104,7 +114,59 @@ const LoginPage = () => {
   };
 
   const handleForgotPassword = () => {
-    toast({ title: "Password Reset", description: "Password reset functionality will be available soon." });
+    setIsForgotOpen(true);
+    setForgotStep(1);
+    setForgotEmail('');
+    setForgotOtp('');
+    setForgotNewPassword('');
+  };
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      toast({ title: 'Error', description: 'Please enter your email address', variant: 'destructive' });
+      return;
+    }
+    setIsForgotLoading(true);
+    try {
+      const res = await authApi.forgotPassword(forgotEmail);
+      setIsForgotLoading(false);
+      if (res.warning) {
+        toast({ title: 'Important Info', description: `${res.message} Note: ${res.warning}` });
+      } else {
+        toast({ title: 'OTP Sent', description: res.message });
+      }
+      setForgotStep(2);
+    } catch (err: any) {
+      setIsForgotLoading(false);
+      toast({ title: 'Error', description: err.message || 'Failed to send OTP', variant: 'destructive' });
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotOtp || !forgotNewPassword) {
+      toast({ title: 'Error', description: 'Please fill in all fields', variant: 'destructive' });
+      return;
+    }
+    if (forgotNewPassword.length < 8) {
+      toast({ title: 'Error', description: 'Password must be at least 8 characters long', variant: 'destructive' });
+      return;
+    }
+    setIsForgotLoading(true);
+    try {
+      const res = await authApi.resetPassword({
+        email: forgotEmail,
+        otp: forgotOtp,
+        newPassword: forgotNewPassword,
+      });
+      setIsForgotLoading(false);
+      toast({ title: 'Success', description: res.message || 'Password reset successfully!' });
+      setIsForgotOpen(false);
+    } catch (err: any) {
+      setIsForgotLoading(false);
+      toast({ title: 'Error', description: err.message || 'Failed to reset password', variant: 'destructive' });
+    }
   };
 
   return (
@@ -310,6 +372,100 @@ const LoginPage = () => {
           </p>
         </div>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={isForgotOpen} onOpenChange={setIsForgotOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              {forgotStep === 1 
+                ? "Enter your email address and we'll send you an OTP to reset your password."
+                : "Enter the 6-digit OTP code sent to your email and your new password."
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          {forgotStep === 1 ? (
+            <form onSubmit={handleSendOtp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email">Email Address</Label>
+                <Input
+                  id="forgot-email"
+                  type="email"
+                  placeholder="name@company.com"
+                  required
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="rounded-xl h-11"
+                />
+              </div>
+              <DialogFooter className="sm:justify-end mt-4">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => setIsForgotOpen(false)}
+                  className="rounded-xl"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isForgotLoading}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-11"
+                >
+                  {isForgotLoading ? "Sending..." : "Send OTP"}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-otp">OTP Code</Label>
+                <Input
+                  id="forgot-otp"
+                  type="text"
+                  placeholder="123456"
+                  required
+                  maxLength={6}
+                  value={forgotOtp}
+                  onChange={(e) => setForgotOtp(e.target.value)}
+                  className="rounded-xl h-11 text-center font-mono text-lg tracking-wider"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="forgot-new-password">New Password</Label>
+                <Input
+                  id="forgot-new-password"
+                  type="password"
+                  placeholder="Minimum 8 characters"
+                  required
+                  value={forgotNewPassword}
+                  onChange={(e) => setForgotNewPassword(e.target.value)}
+                  className="rounded-xl h-11"
+                />
+              </div>
+              <DialogFooter className="sm:justify-between mt-4">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => setForgotStep(1)}
+                  className="rounded-xl"
+                >
+                  Back
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isForgotLoading}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-11"
+                >
+                  {isForgotLoading ? "Resetting..." : "Reset Password"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

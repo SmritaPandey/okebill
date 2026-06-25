@@ -335,5 +335,58 @@ router.post('/invoice-payment', auth_1.authMiddleware, async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
+// ─── POST /subscription/downgrade-free ───────────────────
+// Downgrade to Free Tier and delete all trial data
+router.post('/downgrade-free', auth_1.authMiddleware, async (req, res) => {
+    try {
+        const userId = req.userId;
+        // 1. Delete all transactional trial data
+        await prisma_1.default.$transaction([
+            prisma_1.default.payment.deleteMany({ where: { userId } }),
+            prisma_1.default.invoice.deleteMany({ where: { userId } }),
+            prisma_1.default.client.deleteMany({ where: { userId } }),
+            prisma_1.default.proposal.deleteMany({ where: { userId } }),
+            prisma_1.default.contract.deleteMany({ where: { userId } }),
+            prisma_1.default.expense.deleteMany({ where: { userId } }),
+            prisma_1.default.creditNote.deleteMany({ where: { userId } }),
+            prisma_1.default.recurringInvoice.deleteMany({ where: { userId } }),
+            prisma_1.default.notification.deleteMany({ where: { userId } }),
+            prisma_1.default.file.deleteMany({ where: { userId } }),
+        ]);
+        // 2. Find or create/update subscription to 'free' plan
+        const existingSub = await prisma_1.default.subscription.findFirst({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+        });
+        if (existingSub) {
+            await prisma_1.default.subscription.update({
+                where: { id: existingSub.id },
+                data: {
+                    plan: 'free',
+                    status: 'active',
+                    endDate: new Date(Date.now() + 36500 * 24 * 60 * 60 * 1000), // 100 years
+                    trialEndsAt: null,
+                    amount: 0,
+                },
+            });
+        }
+        else {
+            await prisma_1.default.subscription.create({
+                data: {
+                    userId,
+                    plan: 'free',
+                    status: 'active',
+                    endDate: new Date(Date.now() + 36500 * 24 * 60 * 60 * 1000),
+                    amount: 0,
+                },
+            });
+        }
+        res.json({ success: true, message: 'Downgraded to Free Tier. All trial data has been cleared.' });
+    }
+    catch (err) {
+        console.error('Downgrade to free error:', err);
+        res.status(500).json({ message: err.message || 'Failed to downgrade to Free Tier' });
+    }
+});
 exports.default = router;
 //# sourceMappingURL=subscription.js.map

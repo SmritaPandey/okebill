@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { SUBSCRIPTION_PLANS } from '../lib/payg';
 
 const router = Router();
 router.use(authMiddleware);
@@ -40,6 +41,42 @@ router.get('/:id', async (req: AuthRequest, res) => {
 // POST /clients
 router.post('/', async (req: AuthRequest, res) => {
     try {
+        // Check limits
+        const subscription = await prisma.subscription.findFirst({
+            where: { userId: req.userId! },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        const planId = subscription?.plan || 'free';
+        let isExpired = false;
+        if (subscription?.plan === 'free_trial' && subscription.trialEndsAt) {
+            if (new Date() > subscription.trialEndsAt) {
+                isExpired = true;
+                if (subscription.status === 'active') {
+                    await prisma.subscription.update({
+                        where: { id: subscription.id },
+                        data: { status: 'expired' },
+                    });
+                }
+            }
+        }
+
+        if (subscription?.status === 'expired' || isExpired) {
+            res.status(403).json({ message: 'Your subscription has expired. Please upgrade or downgrade to the Free Tier.' });
+            return;
+        }
+
+        const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
+        const limit = plan?.limits?.clients ?? 2; // Default to free tier limit
+
+        if (limit !== -1) {
+            const currentClientsCount = await prisma.client.count({ where: { userId: req.userId! } });
+            if (currentClientsCount >= limit) {
+                res.status(403).json({ message: `Client limit reached. You can only have up to ${limit} clients on the ${plan?.name || 'Free Tier'}. Please upgrade to add more.` });
+                return;
+            }
+        }
+
         const client = await prisma.client.create({ data: { ...req.body, userId: req.userId! } });
         res.status(201).json(client);
     } catch (err: any) {

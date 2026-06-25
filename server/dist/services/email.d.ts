@@ -39,5 +39,6 @@ export declare function sendPaymentReceiptEmail(data: {
     reference: string;
     balanceRemaining: number;
 }): Promise<import("nodemailer/lib/smtp-transport").SentMessageInfo>;
+export declare function sendPasswordResetEmail(to: string, otpCode: string, name: string): Promise<import("nodemailer/lib/smtp-transport").SentMessageInfo>;
 export declare function isEmailConfigured(): boolean;
 //# sourceMappingURL=email.d.ts.map
